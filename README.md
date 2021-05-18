@@ -6,6 +6,7 @@
 <br>
 <li><strong style="color:red">GUI Tkinter</strong></li>
 <br>
+<img src ="icons/sunflower.jfif" >
 </ul>
 
 
