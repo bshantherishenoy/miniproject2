@@ -8,6 +8,16 @@
 <br>
 <img src ="icons/sunflower.jfif" >
 </ul>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>data flow chart</title>
 
+</head>
+<body>
+<img src="dataflow.png" alt ="dataflow digrams">
+</body>
+</html>
 
 
