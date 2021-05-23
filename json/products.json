@@ -1,0 +1,25 @@
+{
+    "products": [
+        {
+            "product_id": 7,
+            "name": "toolbox",
+            "type": "hardware",
+            "quantity": 100,
+            "price": 40
+        },
+        {
+            "product_id": 3,
+            "name": "Lawnmover",
+            "type": "Agriculture",
+            "quantity": 90,
+            "price": 90
+        },
+        {
+            "product_id": 4,
+            "name": "toolbox",
+            "type": "Agriculture",
+            "quantity": 8,
+            "price": 40
+        }
+    ]
+}
