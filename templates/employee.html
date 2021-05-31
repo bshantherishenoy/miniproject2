@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="container" style="margin-top:160px;padding-left:240px;text-align: center;">
+        <h1>Employee Section</h1>
+        <br>
+        <div class="buttons" style="display:flex;justify-content:center;">
+            <input id="toggleVisibilityButton" type="button" class="btn btn-primary" value="Show Employees"/>
+            <button style="margin-left:10px" type="button"  class="btn btn-success" data-bs-toggle="modal" data-bs-target="#exampleModal">Add Employee</button>
+            <button style="margin-left:10px" type="button"  class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#exampleModal1">Delete Employee</button>
+        </div>
+        <br>
+        {% if warning==1: %}
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <h4><strong><i class="fas fa-exclamation-triangle"></i>  INVALID EMPLOYEE!!</strong></h4>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endif %}
+
+        <div style="with:100%">
+            <table  class="table table-responsive" id="displaytable" style="display:none; overflow:auto;margin-top:10px;width:100%" border="3"  >
+                <thead>
+                <tr>
+                    <td style="padding:5px 10px"><strong>Employee Id</strong></td>
+                    <td style="padding:5px 10px" ><strong>Name</strong></td>
+                    <td style="padding:5px 10px"><strong>Password</strong></td>
+                </tr>
+                </thead>
+                <tbody>
+                {%for i in data: %}
+                <tr>
+                    <td style="padding:5px 10px">{{i["employee_id"]}}</td>
+                    <td>{{i["name"]}}</td>
+                    <td>{{i["password"]}}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+            </div>
+        </div>
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Add a Employee</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body text-center">
+                        <form class="form-signin needs-validation" novalidate action="{{url_for('employee')}}" method="post">
+                            <h1 class="h3 mb-3 font-weight-normal">Employee Details</h1>
+                            <input  type="text" id="employeeId" class="form-control" placeholder="" name="Employee Id" required>
+                            <br>
+                            <input type="text" id="EmployeeName" class="form-control" placeholder="Name" name="Name" required>
+                            <br>
+                            <input type="password" id="EmployeePassword" class="form-control" placeholder="Password" name="Password" required>
+                            <br>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="submit"  name="post" value="adding" class="btn btn-primary">Save changes</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--                    modal 2-->
+        <div class="modal fade" id="exampleModal1" tabindex="-1" aria-labelledby="exampleModalLabel1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel1">Delete a Employee</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body text-center">
+                        <form class="form-signin" action="{{url_for('employee')}}" method="post">
+                            <h1 class="h3 mb-3 font-weight-normal">Employee Details</h1>
+                            <label>Enter Employee ID</label>
+                            <input  type="text" id="inputId1" class="form-control" placeholder="" name="Employee Id">
+                            <br>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="submit"  name="post" value="Deleting" class="btn btn-primary">Save changes</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+<script>document.getElementById("toggleVisibilityButton").addEventListener("click", function(button) {
+                    if (document.getElementById("displaytable").style.display === "none")             document.getElementById("displaytable").style.display = "table";
+                    else document.getElementById("displaytable").style.display = "none";
+                    });</script>
+
+{% endblock %}

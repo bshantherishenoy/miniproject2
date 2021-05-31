@@ -1,21 +1,24 @@
 {
-  "admin":{
-    "name": "Ashwini",
-    "password": "123"
-  },
-  "employee": [
-    {
-      "employee_id": "1",
-      "name": "Akshatha",
-      "password": "1234"
+    "admin": {
+        "employee_id": "0",
+        "name": "Ashwini",
+        "password": "123"
     },
-
-    {
-      "employee_id": "2",
-      "name": "Shreyas",
-      "password": "kjdjadsg;"
-    }
+    "employee": [
+        {
+            "employee_id": "1",
+            "name": "Akshatha",
+            "password": "1234"
+        },
+        {
+            "employee_id": "2",
+            "name": "Shreyas",
+            "password": "kjdjadsg;"
+        },
+        {
+            "employee_id": "3",
+            "name": "Ashika",
+            "password": "dhyan"
+        }
     ]
-  }
-
-
+}
