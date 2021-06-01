@@ -10,13 +10,17 @@ app.config['SECRET_KEY'] = 'secret-key-goes-here'
 index = None
 indexs = None
 # -----------------------config----------------------------#
+
+
 def validate_upload(f):
-  def wrapper():
-    if 'completed' not in flask.session or not flask.session['completed']:
-      return flask.redirect('/')
-    return f()
-  return wrapper
+    def wrapper():
+        if 'completed' not in flask.session or not flask.session['completed']:
+            return flask.redirect('/')
+        return f()
+    return wrapper
 # -----------------------Data---------------------------#
+
+
 with open('json/users.json') as f:
     contents = json.loads(f.read())
 
@@ -87,8 +91,8 @@ def home():
         elif data['submit_button'] == 'Employee':
             global flag
             for i in contents['employee']:
-                print(f"{data['Name']} == {i['name']} and {data['Password']} == {i['password']}")
-                if data['Name'] == i['name'] and data['Password'] == i['password']:
+                print(f"{data['Name']} == {i['name']} and {data['Password']} == {i['password']} and {data['Id']} == {i['employee_id']}")
+                if data['Name'] == i['name'] and check_password_hash(i["password"], data["Password"]) and data['Id'] == i['employee_id']:
                     flag = True
 
             if flag:
@@ -125,11 +129,17 @@ def employee():
         employee_data = request.form
         print(employee_data)
         if employee_data["post"] == 'adding':
+            hash_and_salted_password = generate_password_hash(
+                employee_data["Password"],
+                method='pbkdf2:sha256',
+                salt_length=8
+            )
             new_emp = {
                 "employee_id": employee_data["Employee Id"],
                 "name": employee_data["Name"],
-                "password": employee_data["Password"]
+                "password":hash_and_salted_password
             }
+
             with open("json/users.json") as file:
                 emp = json.load(file)
                 emp_list = emp["employee"]
