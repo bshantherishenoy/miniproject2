@@ -19,6 +19,11 @@
             "employee_id": "3",
             "name": "Ashika",
             "password": "pbkdf2:sha256:260000$huSHj0yu$0ec8999d9a0e012a634cb7b1f277ebeaf197e495ff9f332ac7f4c841f9eaa2be"
+        },
+        {
+            "employee_id": "4",
+            "name": "chetan",
+            "password": "pbkdf2:sha256:260000$NTWlBiZ6$abe361eafcb654ab0baa4f46850740a34167d8b0ad6c262144cb00b8dd2ee194"
         }
     ]
 }

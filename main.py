@@ -2,6 +2,8 @@ import flask
 from flask import Flask, render_template, request, redirect , flash, send_from_directory
 from werkzeug.security import generate_password_hash, check_password_hash
 import json
+import datetime
+import ast
 
 
 app = Flask(__name__)
@@ -10,7 +12,9 @@ app.config['SECRET_KEY'] = 'secret-key-goes-here'
 index = None
 indexs = None
 # -----------------------config----------------------------#
-
+@app.context_processor
+def inject_today_date():
+    return {'today_date': datetime.date.today()}
 
 def validate_upload(f):
     def wrapper():
@@ -19,12 +23,6 @@ def validate_upload(f):
         return f()
     return wrapper
 # -----------------------Data---------------------------#
-
-
-with open('json/users.json') as f:
-    contents = json.loads(f.read())
-
-
 def write_json(data, filename="json/products.json"):
     with open(filename, "w") as f:
         json.dump(data, f, indent=4)
@@ -77,6 +75,9 @@ flag = False
 
 @app.route('/', methods=['GET', 'POST'])
 def home():
+    with open('json/users.json') as f:
+        contents = json.loads(f.read())
+
     if request.method == "POST":
         data = request.form
         print(data)
@@ -96,7 +97,12 @@ def home():
                     flag = True
 
             if flag:
-                return render_template("signup.html")
+                flask.session['completed'] = True
+                user = {
+                    'Name': data['Name'],
+                    'Id': data['Id']
+                }
+                return render_template("Employee_login.html", edata=user)
             else:
                 num = 1
                 return render_template("index.html", post=num)
@@ -108,6 +114,35 @@ def home():
         num = 0
         flask.session['completed'] = False
         return render_template("index.html", post=num)
+
+
+# ------------------------------Routes to employee--------------#
+
+@app.route('/Employee_login/<user>',methods=["GET,POST"])
+def Employee_login(user):
+    if request.method=="POST":
+        return "<h1>This happened</h1>"
+    else:
+        return render_template("Employee_login.html",edata=user)
+
+
+@app.route('/Billing/<user>',methods=['GET','POST'])
+def Billing(user):
+    if request.method == "POST":
+        return "<h1> This Happened</h1>"
+    else:
+        print(user)
+        x = user.replace("'", '"')
+        data = json.loads(x)
+        print(type(data))
+        return render_template("Billing.html", edata=data)
+
+
+
+
+
+
+# --------------------------Routs to Admin----------------#
 
 
 @app.route('/admin', endpoint="admin")
