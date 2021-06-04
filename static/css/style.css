@@ -1,0 +1,65 @@
+form input {
+    border: none;
+    background: transparent;
+}
+body, html {
+    height: 100%;
+}
+
+.flexview {
+    display: flex;
+}
+
+.flexview p {
+    flex: 1;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+    padding-left: 10px;
+}
+
+.my-custom-scrollbar {
+position: relative;
+height: 300px;
+overflow: auto;
+}
+.table-wrapper-scroll-y {
+display: block;S
+}
+
+.content {
+    height: 65vh;
+}
+
+.fruit-input {
+    margin: 0.5rem 0 0.5rem 0;
+}
+
+.remove-btn {
+    border: none;
+    background: rgb(255, 68, 68);
+    color: white;
+}
+
+.remove-btn:hover {
+    background: rgb(194, 50, 50);
+    color: white;
+}
+
+.large {
+    font-size: 1.2rem;
+}
+
+.s {
+    height: 50vh;
+    padding-top: 70px;
+}
+
+.total {
+    height: 15vh;
+    justify-content: center;
+    padding-top: 5%;
+}
+
+.hidden {
+    display: none;
+}

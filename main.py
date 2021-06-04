@@ -1,10 +1,13 @@
 import flask
-from flask import Flask, render_template, request, redirect , flash, send_from_directory
+from flask import Flask, render_template, request, redirect
 from werkzeug.security import generate_password_hash, check_password_hash
 import json
 import datetime
-import ast
+import pandas as pd
+from csv import DictWriter
 
+# ---------------------Initializing Dataframe --------------#
+output = pd.DataFrame()
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret-key-goes-here'
@@ -12,9 +15,13 @@ app.config['SECRET_KEY'] = 'secret-key-goes-here'
 index = None
 indexs = None
 # -----------------------config----------------------------#
+
+
 @app.context_processor
 def inject_today_date():
     return {'today_date': datetime.date.today()}
+
+
 
 def validate_upload(f):
     def wrapper():
@@ -23,6 +30,8 @@ def validate_upload(f):
         return f()
     return wrapper
 # -----------------------Data---------------------------#
+
+
 def write_json(data, filename="json/products.json"):
     with open(filename, "w") as f:
         json.dump(data, f, indent=4)
@@ -54,24 +63,9 @@ def search_for_employee(list, n):
     return False
 
 
-# ----------------------Login Manager------------------#
-# login_manager = LoginManager()
-# login_manager.init_app(app)
-#
-#
-# @login_manager.user_loader
-# def load_user(user_id):
-#     return contents['admin']['employee_id'],contents['employee']['employee_id']
-
-# ---------------------Routes---------------------------#
-
-
-# @app.route('/')
-# def home():
-#     num = 0
-#     return render_template('index.html', post=num)
-
 flag = False
+
+
 
 @app.route('/', methods=['GET', 'POST'])
 def home():
@@ -80,7 +74,6 @@ def home():
 
     if request.method == "POST":
         data = request.form
-        print(data)
         if data['submit_button'] == 'Administrator':
             if data['Name'] == contents['admin']['name'] and data['Password'] == contents['admin']['password']:
                 flask.session['completed'] = True
@@ -92,16 +85,24 @@ def home():
         elif data['submit_button'] == 'Employee':
             global flag
             for i in contents['employee']:
-                print(f"{data['Name']} == {i['name']} and {data['Password']} == {i['password']} and {data['Id']} == {i['employee_id']}")
                 if data['Name'] == i['name'] and check_password_hash(i["password"], data["Password"]) and data['Id'] == i['employee_id']:
+                    print(f"{data['Name']} == {i['name']} and {data['Password']} == {i['password']} and {data['Id']} == {i['employee_id']}")
                     flag = True
 
             if flag:
-                flask.session['completed'] = True
+                # flask.session['completed'] = True
                 user = {
                     'Name': data['Name'],
                     'Id': data['Id']
                 }
+                new_row = user
+                x=datetime.datetime.now()
+                field_names = ['Name', 'Id', 'Time']
+                new_row.update({'Time': str(x)})
+                with open('event.csv', 'a') as f_object:
+                    dictwriter_object = DictWriter(f_object, fieldnames=field_names)
+                    dictwriter_object.writerow(new_row)
+                    f_object.close()
                 return render_template("Employee_login.html", edata=user)
             else:
                 num = 1
@@ -117,29 +118,81 @@ def home():
 
 
 # ------------------------------Routes to employee--------------#
+@app.route('/events')
+def events():
+    column = ['Name','Id','Time']
+    ds = pd.read_csv('event.csv', names=column)
+    with open("templates/events.html", mode="w") as file:
+        file.write(ds.to_html())
+    return render_template("events.html")
 
-@app.route('/Employee_login/<user>',methods=["GET,POST"])
+
+
+
+@app.route('/Employee_login/<user>', methods=["GET", "POST"])
 def Employee_login(user):
-    if request.method=="POST":
-        return "<h1>This happened</h1>"
-    else:
-        return render_template("Employee_login.html",edata=user)
-
-
-@app.route('/Billing/<user>',methods=['GET','POST'])
-def Billing(user):
     if request.method == "POST":
-        return "<h1> This Happened</h1>"
-    else:
-        print(user)
-        x = user.replace("'", '"')
-        data = json.loads(x)
+        return render_template("Employee_login.html", edata=user)
+    return render_template("Employee_login.html", edata=user)
+
+
+@app.route('/customers')
+def Customer():
+    output.to_csv('customer_data.csv', mode='a', header=False)
+    columns = ['invoice', 'CustomerName', 'CustomerPhoneno', 'Date', 'EmployeeID', 'EmployeeName', 'Quantity', 'Product\'s', 'Price', 'Total']
+    df = pd.read_csv('customer_data.csv', names=columns)
+    with open("templates/customer.html", mode="w") as file:
+        file.write(df.to_html())
+    return render_template("customer.html")
+
+
+@app.route('/Billing/<user>', methods=['GET', 'POST'])
+def Billing(user):
+    print(user)
+    x = user.replace("'", '"')
+    data = json.loads(x)
+    print(type(data))
+    with open('json/products.json') as f1:
+        pro_cons = json.load(f1)
+        pro_con = pro_cons["products"]
+    if request.method == "POST":
+        print("POST HAPPENED")
+        datas = request.form
+        print(datas)
+        new_row = {
+            "Invoice NO": datas["Invoice No"],
+            "EmployeeId": datas["EmployeeId"],
+            "CustomerName": datas["CustomerName"],
+            "CustomerPhoneno": datas["CustomerPhoneno"],
+            "Date": datas["Date"],
+            "EmployeeName": datas["EmployeeName"],
+            "Products": request.form.getlist('name'),
+            "Price": request.form.getlist('value'),
+            "Total": datas['TotalPrice']
+        }
+        global output
+        output = output.append(new_row, ignore_index=True)
+        print(output.head())
+        print(new_row)
+        Name = request.form.getlist('name')
+        Quantity = request.form.getlist('value')
+        Price = request.form.getlist('price')
+        print(output.head())
+        print(Name)
+        print(Quantity)
+        for i in range(len(pro_con)):
+            for m in range(len(Name)):
+                if pro_con[i]["name"] == Name[m]:
+                    # print(f"{products[i]['quantity']} -= {Quantity[i]}")
+                    pro_con[i]["quantity"] = pro_con[i]["quantity"] - int(Quantity[m])
+
+        write_json(pro_cons)
+        print(type(user))
         print(type(data))
-        return render_template("Billing.html", edata=data)
-
-
-
-
+        print(data)
+        return render_template("Billing.html", edata=data, products=pro_con)
+    else:
+        return render_template("Billing.html", edata=data, products=pro_con)
 
 
 # --------------------------Routs to Admin----------------#
@@ -157,7 +210,7 @@ def admin():
 #     return '<h1>Shit working!!</h1>'
 
 
-@app.route('/employee', methods=['GET','POST'], endpoint="employee")
+@app.route('/employee', methods=['GET', 'POST'], endpoint="employee")
 @validate_upload
 def employee():
     if request.method == "POST":
@@ -172,7 +225,7 @@ def employee():
             new_emp = {
                 "employee_id": employee_data["Employee Id"],
                 "name": employee_data["Name"],
-                "password":hash_and_salted_password
+                "password": hash_and_salted_password
             }
 
             with open("json/users.json") as file:

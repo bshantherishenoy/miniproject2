@@ -5,6 +5,7 @@
     <title>Shop</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
     <link rel="stylesheet" href="static/css/homestyles.css">
+
 </head>
 <div class="text-center">
   <main class="form-signin">
@@ -26,9 +27,9 @@
             };
         </script>
         <label style="margin:20px;text-align:center;margin-left:45px;margin-right:45px" > <strong>ID</strong> </label>
-        <input type="text" name="Id" placeholder="Enter ID">
+        <input type="text" name="Id" id="ID" placeholder="Enter ID">
         <label style="margin:20px;text-align:center;margin-left:45px"> <strong>Name</strong> </label>
-        <input type="text" name="Name" placeholder="Enter Name">
+        <input type="text" name="Name" id="Name" placeholder="Enter Name">
         <br>
         <label style="margin:20px;text-align:center;"><strong>Password</strong> </label>
         <input type="password" name="Password" placeholder="Enter Password">
@@ -45,8 +46,9 @@
 
 
 </div>
+     <script>window.onload=function(){localStorage.setItem("prev_page", location.href)}
 
-
+function go_back(){window.location.href = localStorage.getItem("prev_page")};</script>
 
 
 

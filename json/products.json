@@ -2,23 +2,23 @@
     "products": [
         {
             "product_id": 7,
-            "name": "toolbox",
+            "name": "Toolbox",
             "type": "hardware",
-            "quantity": 100,
+            "quantity": 31,
             "price": 40
         },
         {
             "product_id": 3,
             "name": "Lawnmover",
             "type": "Agriculture",
-            "quantity": 90,
+            "quantity": 46,
             "price": 90
         },
         {
             "product_id": 4,
-            "name": "magnet",
+            "name": "Magnet",
             "type": "hardware",
-            "quantity": 100,
+            "quantity": 32,
             "price": 20
         }
     ]

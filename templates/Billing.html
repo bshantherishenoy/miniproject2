@@ -1,89 +1,135 @@
-{% extends "employee_base.html" %}
-{% block content %}
-<main>
-      <div class="container" style="margin-top:60px;margin-left:220px;overflow:hidden;text-align:center;">
-      <h1>Billing</h1>
-      <table class="table table-bordered">
-            <tr>
-                  <td><strong>Employee Name</strong></td>
-                  <td>{{edata.Name}}</td>
-                  <td><strong>Employee ID</strong></td>
-                  <td>{{edata.Id}}</td>
-            </tr>
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Billing</title>
+        <link rel="stylesheet" href="../static/css/style.css">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+<!--         <script type="text/javascript" >-->
+<!--        const User = localStorage.getItem('Name');-->
+<!--        const Id = localStorage.getItem('Id');-->
+<!--    </script>-->
+    </head>
 
-      </table>
-            <br>
-            <h2>Customer Details</h2>
-            <form class="row g-3 needs-validation" novalidate>
-                  <div class="col-md-4">
-                        <label for="validationCustom01" class="form-label">Invoice No</label>
-                        <input type="text" class="form-control" id="validationCustom01" name="Invoiceno" required>
-                        <div class="valid-feedback">
-                              Looks good!
+    <body>
+        <div class="container-fluid">
+            <div class="row content">
+                <div class="col-sm-4  text-center p-sm-0">
+                    <form class="was-validation pl-sm-2 bg-dark s" style="color:white;">
+                        <div class="form-row pr-2">
+                            <label for="item-name" class="col-sm-4 text-left fruit-input">Item Name : </label>
+                            <input type="text" class='col-sm-7 mb-sm-2 form-control' id="item-name" name="item-name" placeholder="Item name" required>
                         </div>
-                  </div>
-                  <div class="col-md-4 offset-md-4">
-                        <label for="validationCustom02" class="form-label">Date</label>
-                        <input type="text" class="form-control" id="validationCustom02" value="{{today_date}}" name="Date" required>
-                        <div class="valid-feedback">
-                              Looks good!
-                        </div>
-                  </div>
-                    <div class="col-md-4">
-                        <label for="validationCustom3" class="form-label">Customer Name</label>
-                        <input type="text" class="form-control" id="validationCustom3" name="CustomerName" required>
-                        <div class="valid-feedback">
-                              Looks good!
-                        </div>
-                  </div>
-                  <div class="col-md-4 offset-md-4">
-                        <label for="validationCustom4" class="form-label">Date</label>
-                        <input type="tel" class="form-control" id="validationCustom4"  name="Phone No" required>
-                        <div class="valid-feedback">
-                              Looks good!
-                        </div>
-                  </div>
 
-                  <div class="col-md-2">
-                        <label for="validationCustom03" class="form-label">Product</label>
-                        <input type="text" class="form-control" id="validationCustom03" required name="Product">
-                        <div class="invalid-feedback">
-                              Please provide a valid Product.
+                        <div class="form-row pr-2">
+                            <label for="fruit-price" class="col-sm-4 text-left fruit-input">Item Price : </label>
+                            <input type="number" min="0" class="col-sm-7 mb-sm-2 form-control" id="fruit-price" name="fruit-price" required>
                         </div>
-                  </div>
-                  <div class="col-md-2">
-                        <label for="validationCustom04" class="form-label">Quantity</label>
-                         <input type="number" min="0" class="form-control" id="validationCustom04" required name="Quantity">
-                        <div class="invalid-feedback">
-                              Please select a valid Quantity.
-                        </div>
-                  </div>
-                  <div class="col-md-1" style="font-size:60px;"><strong>&#43;</strong></div>
-                  <div class="col-md-2">
-                        <label for="validationCustom05" class="form-label">Price</label>
-                        <input type="number" min="0.00" max="10000.00" step="0.01"  class="form-control" id="validationCustom05" name="Price" required>
-                        <div class="invalid-feedback">
-                              Please provide a valid Price
-                        </div>
-                  </div>
-                  <div class="col-md-2">
-                        <label for="validationCustom16" class="form-label">Discount</label>
-                        <input type="number" min="0" max="20" step="1"  class="form-control" id="validationCustom16" name="Discount" required>
-                        <div class="invalid-feedback">
-                              Please provide a valid Discount
-                        </div>
-                  </div>
-                  <div class="col-md-1" style="font-size:60px;"><strong>&#61;</strong></div>
-                  <div class="col-md-2">
-                        <label for="validationCustom17" class="form-label">Total</label>
-                        <input type="number" min="0"  step="1"  class="form-control" id="validationCustom17" name="Total" required>
-                        <div class="invalid-feedback">
-                              Please provide a valid Total
-                        </div>
-                  </div>
 
-            </form>
-      </div>
-</main>
-<script src="../static/js/time.js"></script>
-{% endblock %}
+                        <div class="form-row pr-2 form-group">
+                            <label for="fruit-quantity" class="col-sm-4 text-left fruit-input">Quantity : </label>
+                            <input type="number" min="0" class="col-sm-7 mb-sm-2 form-control" id="fruit-quantity" name="fruit-quantity" required>
+                        </div>
+
+                        <div class="container">
+                            <button type="submit" class="btn btn-success" id="add-btn">Add</button> <br><br>
+                            <button type="button" class="btn btn-danger mb-sm-2" id="fruit-basket">View Item Basket</button>
+                            <button type="button" class="btn btn-info mb-sm-2" id="total-price">View Total Price</button>
+                        </div>
+                    </form>
+
+                    <div class="total bg-info hidden" id="total-div">
+
+                    </div>
+                    <h1>Products Table</h1>
+                    <div class="table-wrapper-scroll-y my-custom-scrollbar">
+                    <table class="table table-bordered" style="overflow:auto;">
+                        <thead>
+                        <tr>
+                            <td style="padding:5px 10px"><strong>Product Id</strong></td>
+                            <td style="padding:5px 10px" ><strong>Name</strong></td>
+                            <td style="padding:5px 10px"><strong>Type</strong></td>
+                            <td style="padding:5px 10px" ><strong>Quantity</strong></td>
+                            <td  style="padding:5px 10px"><strong>Price</strong></td>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {%for i in products: %}
+                        <tr>
+                            <td style="padding:5px 10px">{{i["product_id"]}}</td>
+                            <td>{{i["name"]}}</td>
+                            <td>{{i["type"]}}</td>
+                            <td>{{i["quantity"]}}</td>
+                            <td>{{i["price"]}}</td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+
+                    </table>
+                    </div>
+                </div>
+                <div class="col-lg-8 ">
+                  <h1 style="text-align:center;">Billing</h1>
+                    <div class="row">
+                        <div class="col-lg-2">
+                            <label>Invoice NO</label>
+                            <input name="Invoice No" form="list" type="number" min="1" required>
+                        </div>
+                        <div class="col-lg-2">
+                            <label>Employee ID</label>
+                            <input name="EmployeeId" form="list" value="{{edata.Id}}" required>
+                        </div>
+                        <div class="col-lg-2">
+                            <label>Customer Name</label>
+                            <input name="CustomerName" form="list" type="text" required>
+                        </div>
+                        <div class="col-lg-2">
+                            <label>Customer Phno:</label>
+                            <input name="CustomerPhoneno" form="list" type="tel" required>
+                        </div>
+                        <div class="col-lg-2">
+                            <label>Date</label>
+                            <input name="Date" form="list" value="{{today_date}}" required>
+                        </div>
+                         <div class="col-lg-2">
+                            <label>Employee Name</label>
+                            <input name="EmployeeName" form="list" value="{{edata.Name}}" required>
+
+                         </div>
+
+                    </div>
+
+                    <table class="table">
+                    <tr>
+                      <td><strong>Item name</strong></td>
+                      <td><strong>Item price</strong></td>
+                      <td><strong>Item quantity</strong></td>
+                      <td><strong>Remove Button</strong></td>
+                    </tr>
+                  </table>
+
+                  <form id="list" style="background:white;" action="{{url_for('Billing',user=edata)}}" method="post">
+
+                  </form>
+                  <div style="position:fixed;top:600px;left:880px;">
+                    <label>Total amount to be payed:</label>
+                    <input type="number" min="0" form="list" name="TotalPrice"  />
+                    <button type="submit" class="btn btn-danger" form="list" name="form">Submit</button>
+                    <a type="button" class="btn btn-success" href="{{url_for('Employee_login',user=edata)}}" >Go Back</a>
+                  </div>
+                </div>
+
+
+            </div>
+
+        </div>
+        <script>window.onload=function(){localStorage.setItem("prev_page", location.href)}
+
+function go_back(){window.location.href = localStorage.getItem("prev_page")};</script>
+        <script type="text/javascript" src="../json/products.json"></script>
+        <script src="../static/js/time.js"></script>
+        <script src="../static/js/script.js"></script>
+        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
+    </body>
+</html>
