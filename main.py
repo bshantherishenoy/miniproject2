@@ -1,12 +1,21 @@
+# ------------------------IMPORTS ------------------------#
 import flask
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, send_from_directory
 from werkzeug.security import generate_password_hash, check_password_hash
 import json
 import datetime
 import pandas as pd
 from csv import DictWriter
+import uuid
+from reportlab.pdfgen import canvas
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.pdfmetrics import stringWidth
+from reportlab.pdfbase.ttfonts import TTFont
+from PIL import Image
+import csv
+import ast
 
-# ---------------------Initializing Dataframe --------------#
+# ---------------------Initializing Dataframe ------------#
 output = pd.DataFrame()
 
 app = Flask(__name__)
@@ -14,13 +23,17 @@ app.config['SECRET_KEY'] = 'secret-key-goes-here'
 
 index = None
 indexs = None
-# -----------------------config----------------------------#
+# -----------------------config---------------------------#
+
+uuids = None
 
 
 @app.context_processor
 def inject_today_date():
-    return {'today_date': datetime.date.today()}
-
+    global uuids
+    uuids = uuid.uuid4()
+    return {'today_date': datetime.date.today(),
+            'uuid':uuids}
 
 
 def validate_upload(f):
@@ -29,7 +42,7 @@ def validate_upload(f):
             return flask.redirect('/')
         return f()
     return wrapper
-# -----------------------Data---------------------------#
+# -----------------------Data----------------------------#
 
 
 def write_json(data, filename="json/products.json"):
@@ -63,8 +76,8 @@ def search_for_employee(list, n):
     return False
 
 
+# ------------------------ROUTES INDEX_-------------------#
 flag = False
-
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -117,33 +130,174 @@ def home():
         return render_template("index.html", post=num)
 
 
-# ------------------------------Routes to employee--------------#
+# ------------------------------Routes to employee-------#
 @app.route('/events')
 def events():
-    column = ['Name','Id','Time']
+    column = ['Name', 'Id', 'Time']
     ds = pd.read_csv('event.csv', names=column)
     with open("templates/events.html", mode="w") as file:
         file.write(ds.to_html())
     return render_template("events.html")
 
 
-
-
 @app.route('/Employee_login/<user>', methods=["GET", "POST"])
 def Employee_login(user):
-    if request.method == "POST":
+    if type(user) is dict:
         return render_template("Employee_login.html", edata=user)
-    return render_template("Employee_login.html", edata=user)
+    else:
+        x = user.replace("'", '"')
+        data = json.loads(x)
+        print(type(data))
+        return render_template("Employee_login.html", edata=data)
+
+
+# ----------------------------------READ CSV----------------#
+def import_csv(csvfilename):
+    data_csv = []
+    with open(csvfilename, "r", encoding="utf-8", errors="ignore") as scraped:
+        reader = csv.reader(scraped, delimiter=',')
+        row_index = 0
+        for row in reader:
+            if row:  # avoid blank lines
+                row_index += 1
+                columns = [str(row_index), row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8]]
+                data_csv.append(columns)
+    return data_csv
+
+# -----------------------------------PDF --------------------#
+
+
+pdfmetrics.registerFont(TTFont('Arial', 'Arial.ttf'))
+
+
+# import company's logo
+im = Image.open('logo.jpg')
+width, height = im.size
+ratio = width / height
+image_width = 400
+image_height = int(image_width / ratio)
+
+# Page information
+page_width = 2156
+page_height = 3050
+
+# Invoice variables
+company_name = 'Hardware Shop'
+payment_terms = 'x'
+contact_info = 'x'
+margin = 100
+
+pdf_file_name = None
+
+
+def create_invoice(last_row):
+    # Reading values from excel file
+    customer=last_row[1]
+    invoice_number = last_row[6]
+    invoice_date = last_row[3]
+    customer_phno = last_row[2]
+    employee_id = last_row[4]
+    employee_name = last_row[5]
+    products = "".join(last_row[8])
+    total_amount = last_row[9]
+    quantity = "".join(last_row[7])
+
+    # Creating a pdf file and setting a naming convention
+    c = canvas.Canvas(f"static/files/{str(invoice_number)}.pdf")
+    c.setPageSize((page_width, page_height))
+
+    # Drawing the image
+    c.drawInlineImage("logo.jpg", page_width - image_width - margin,
+                      page_height - image_height - margin,
+                      image_width, image_height)
+
+    # Invoice information
+    c.setFont('Arial', 80)
+    text = 'INVOICE'
+    text_width = stringWidth(text, 'Arial', 80)
+    c.drawString((page_width - text_width) / 2, page_height - image_height - margin, text)
+    y = page_height - image_height - margin * 4
+    x = 2 * margin
+    x2 = x + 550
+
+    c.setFont('Arial', 45)
+    c.drawString(x, y, 'Issued by: ')
+    c.drawString(x2, y, company_name)
+    y -= margin
+
+    c.drawString(x, y, 'Issued to: ')
+    c.drawString(x2, y, customer)
+    y -= margin
+
+    c.drawString(x, y, 'Invoice number: ')
+    c.drawString(x2, y, str(invoice_number))
+    y -= margin
+
+    c.drawString(x, y, 'Invoice date: ')
+    c.drawString(x2, y, invoice_date)
+    y -= margin
+
+    c.drawString(x, y, 'Customer Phone No: ')
+    c.drawString(x2, y, customer_phno)
+    y -= margin * 2
+
+    c.drawString(x, y, 'Invoice issued for performed ' + employee_name + ' for ' + invoice_date)
+    y -= margin * 2
+
+    c.drawString(x, y, 'Amount including GST: ')
+    c.drawString(x2, y, 'INR ' + str(total_amount))
+    y -= margin
+
+    c.drawString(x, y, 'Products: ')
+    y -= margin
+    res = ast.literal_eval(products)
+    print(f"ITSRES{res}")
+    for i in range(len(res)):
+        print(i)
+        c.drawString(x, y, res[i])
+        y -= margin
+
+    for i in range(len(res)):
+        y += margin
+
+    y += margin
+    c.drawString(x2, y, 'Quantity: ')
+    y -= margin * 1
+    res = ast.literal_eval(quantity)
+    print(f"ITSRES{res}")
+    for i in range(len(res)):
+        print(i)
+        c.drawString(x2, y, res[i])
+        y -= margin
+
+    c.drawString(x, y, 'Total amount: ')
+    c.drawString(x2, y, 'INR ' + str(total_amount))
+    y -= margin * 3
+
+    c.drawString(x, y, 'Return will only be excepted only after the purchase of item within 2 days')
+    y -= margin
+    c.drawString(x, y, 'Any issues please contact Ashwini & Shantheri')
+    y -= margin
+    c.drawString(x, y, 'In case of any questions, contact info@thebestcompany.com')
+
+    # Saving the pdf file
+    c.save()
+    global pdf_file_name
+    pdf_file_name = f"{str(invoice_number)}.pdf"
+    return print("INVOICE CREATED")
 
 
 @app.route('/customers')
 def Customer():
-    output.to_csv('customer_data.csv', mode='a', header=False)
-    columns = ['invoice', 'CustomerName', 'CustomerPhoneno', 'Date', 'EmployeeID', 'EmployeeName', 'Quantity', 'Product\'s', 'Price', 'Total']
-    df = pd.read_csv('customer_data.csv', names=columns)
+    # print("_________________CSV DATA________________")
+    columns = ['CustomerName', 'CustomerPhoneno', 'Date', 'EmployeeID', 'EmployeeName', 'Invoice NO', 'Quantity', 'Products', 'Total']
+    df = pd.read_csv('customer_data.csv', names=columns )
     with open("templates/customer.html", mode="w") as file:
         file.write(df.to_html())
     return render_template("customer.html")
+
+
+state = 0
 
 
 @app.route('/Billing/<user>', methods=['GET', 'POST'])
@@ -155,6 +309,7 @@ def Billing(user):
     with open('json/products.json') as f1:
         pro_cons = json.load(f1)
         pro_con = pro_cons["products"]
+    global output, state
     if request.method == "POST":
         print("POST HAPPENED")
         datas = request.form
@@ -170,31 +325,51 @@ def Billing(user):
             "Price": request.form.getlist('value'),
             "Total": datas['TotalPrice']
         }
-        global output
-        output = output.append(new_row, ignore_index=True)
-        print(output.head())
-        print(new_row)
+
         Name = request.form.getlist('name')
         Quantity = request.form.getlist('value')
-        Price = request.form.getlist('price')
         print(output.head())
         print(Name)
         print(Quantity)
         for i in range(len(pro_con)):
             for m in range(len(Name)):
                 if pro_con[i]["name"] == Name[m]:
-                    # print(f"{products[i]['quantity']} -= {Quantity[i]}")
                     pro_con[i]["quantity"] = pro_con[i]["quantity"] - int(Quantity[m])
-
-        write_json(pro_cons)
+                    print(f'{pro_con[i]["quantity"]} = {pro_con[i]["quantity"]} - {int(Quantity[m])}')
+                    print("This is happening")
+                    if pro_con[i]["quantity"] > 0:
+                        print("this came here")
+                        output = output.append(new_row, ignore_index=True)
+                        print(output.head())
+                        print(new_row)
+                        print(f"{state} its True in")
+                        output.to_csv('customer_data.csv', mode='a', header=False, index=False)
+                        data_csv = import_csv("customer_data.csv")
+                        last_row = data_csv[-1]
+                        print(last_row)
+                        create_invoice(last_row)
+                        write_json(pro_cons)
+                        state = 0
+                        return render_template("Billing.html", edata=data, products=pro_con, states=state)
+                    else:
+                        state = 1
+                        print(f"{state} its True from out ")
+                else:
+                    state = 1
+                    print(f"{state} its True from out")
         print(type(user))
         print(type(data))
         print(data)
-        return render_template("Billing.html", edata=data, products=pro_con)
+        return render_template("Billing.html", edata=data, products=pro_con, states=state)
     else:
-        return render_template("Billing.html", edata=data, products=pro_con)
+        return render_template("Billing.html", edata=data, products=pro_con, states=state)
 
 
+@app.route('/download')
+def download():
+    global pdf_file_name
+    print(pdf_file_name)
+    return send_from_directory(directory="static", path=f'files/{pdf_file_name}')
 # --------------------------Routs to Admin----------------#
 
 
@@ -240,6 +415,7 @@ def employee():
             with open('json/users.json') as f1:
                 emp = json.load(f1)
                 emp_list = emp["employee"]
+            f1.close()
             print("came here")
             if search_for_employee(emp_list, ID):
                 print("came inside if")
@@ -268,7 +444,7 @@ def products():
         if imd['post'] == 'adding':
             new_product = {
                 "product_id": int(imd['Product Id']),
-                "name": imd['Name'],
+                "name": imd['Name'].title(),
                 "type": imd['Type'],
                 "quantity": int(imd['Quantity']),
                 "price": int(imd['Price'])
@@ -307,7 +483,7 @@ def products():
             if search(pro_con, ID):
                 print(f"{index} Actually not found ")
                 pro_con[index]["product_id"] = int(imd['Product Id'])
-                pro_con[index]["name"] = imd['Name']
+                pro_con[index]["name"] = imd['Name'].title()
                 pro_con[index]["type"] = imd['Type']
                 pro_con[index]["quantity"] = int(imd['Quantity'])
                 pro_con[index]["price"] = int(imd['Price'])
@@ -328,14 +504,3 @@ def products():
 if __name__ == "__main__":
     app.run(debug=True)
 
-# ---------------csv------------------#
-# def add():
-#     pass
-# def remove():
-#     pass
-# def calculate():
-#     pass
-# def sum_all_amounts():
-#     pass
-
-# -----------  DATA  ------------------#

@@ -4,22 +4,29 @@
             "product_id": 7,
             "name": "Toolbox",
             "type": "hardware",
-            "quantity": 31,
+            "quantity": 18,
             "price": 40
         },
         {
             "product_id": 3,
             "name": "Lawnmover",
             "type": "Agriculture",
-            "quantity": 46,
+            "quantity": 38,
             "price": 90
         },
         {
             "product_id": 4,
             "name": "Magnet",
             "type": "hardware",
-            "quantity": 32,
+            "quantity": 10,
             "price": 20
+        },
+        {
+            "product_id": 5,
+            "name": "Spoon",
+            "type": "hardware",
+            "quantity": 99,
+            "price": 10
         }
     ]
 }
