@@ -14,6 +14,8 @@ from reportlab.pdfbase.ttfonts import TTFont
 from PIL import Image
 import csv
 import ast
+import glob
+import os
 
 # ---------------------Initializing Dataframe ------------#
 output = pd.DataFrame()
@@ -42,6 +44,12 @@ def validate_upload(f):
             return flask.redirect('/')
         return f()
     return wrapper
+
+
+def remove_prefix(text, prefix):
+    if text.startswith(prefix):
+        return text[len(prefix):]
+    return text  # or whatever
 # -----------------------Data----------------------------#
 
 
@@ -365,10 +373,19 @@ def Billing(user):
         return render_template("Billing.html", edata=data, products=pro_con, states=state)
 
 
+
 @app.route('/download')
 def download():
     global pdf_file_name
     print(pdf_file_name)
+    if pdf_file_name is None:
+        list_of_files = glob.glob('static/files/*.pdf')  # * means all if need specific format then *.csv
+        latest_file = max(list_of_files, key=os.path.getctime)
+        print(latest_file)
+        prefix = "static/files\\"
+        file_pdf = remove_prefix(latest_file,prefix)
+        print(file_pdf)
+        return send_from_directory(directory="static", path=f'files/{file_pdf}')
     return send_from_directory(directory="static", path=f'files/{pdf_file_name}')
 # --------------------------Routs to Admin----------------#
 
