@@ -366,6 +366,7 @@ def Billing(user):
                     print("this came here")
                     state = 0
                 else:
+                    pro_con[index]["quantity"] = pro_con[index]["quantity"] + int(Quantity[m])
                     state = 1
                     print(f"{state} its True from out this means the values is negative")
                     break
