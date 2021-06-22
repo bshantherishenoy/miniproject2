@@ -20,17 +20,17 @@
                     <form class="was-validation pl-sm-2 bg-dark s" style="color:white;">
                         <div class="form-row pr-2">
                             <label for="item-name" class="col-sm-4 text-left fruit-input">Item Name : </label>
-                            <input type="text" class='col-sm-7 mb-sm-2 form-control' id="item-name" name="item-name" placeholder="Item name" required>
+                            <input  type="text" class='col-sm-7 mb-sm-2 form-control' id="item-name" name="item-name" placeholder="Item name" required>
                         </div>
 
                         <div class="form-row pr-2">
                             <label for="fruit-price" class="col-sm-4 text-left fruit-input">Item Price : </label>
-                            <input type="number" min="0" class="col-sm-7 mb-sm-2 form-control" id="fruit-price" name="fruit-price" required>
+                            <input oninput="validity.valid||(value='');"  type="number"  min="1" class="col-sm-7 mb-sm-2 form-control" id="fruit-price" name="fruit-price" required>
                         </div>
 
                         <div class="form-row pr-2 form-group">
                             <label for="fruit-quantity" class="col-sm-4 text-left fruit-input">Quantity : </label>
-                            <input type="number" min="0" class="col-sm-7 mb-sm-2 form-control" id="fruit-quantity" name="fruit-quantity" required>
+                            <input oninput="validity.valid||(value='');" type="number" min="1" class="col-sm-7 mb-sm-2 form-control" id="fruit-quantity" name="fruit-quantity" required>
                         </div>
 
                         <div class="container">
@@ -121,7 +121,6 @@
                       <a type="button" class="btn btn-warning" href="{{url_for('download')}}" >Download Invoice</a>
                   </div>
                 </div>
-
 
             </div>
 

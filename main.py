@@ -50,7 +50,7 @@ def remove_prefix(text, prefix):
     if text.startswith(prefix):
         return text[len(prefix):]
     return text  # or whatever
-# -----------------------Data----------------------------#
+# --------------------------------Data----------------------------#
 
 
 def write_json(data, filename="json/products.json"):
@@ -84,7 +84,7 @@ def search_for_employee(list, n):
     return False
 
 
-# ------------------------ROUTES INDEX_-------------------#
+# ------------------------ROUTES INDEX---------------------------#
 flag = False
 
 
@@ -138,7 +138,7 @@ def home():
         return render_template("index.html", post=num)
 
 
-# ------------------------------Routes to employee-------#
+# ------------------------------Routes to employee-----------------------#
 @app.route('/events')
 def events():
     column = ['Name', 'Id', 'Time']
@@ -159,7 +159,7 @@ def Employee_login(user):
         return render_template("Employee_login.html", edata=data)
 
 
-# ----------------------------------READ CSV----------------#
+# --------------------------READ CSV------------------------#
 def import_csv(csvfilename):
     data_csv = []
     with open(csvfilename, "r", encoding="utf-8", errors="ignore") as scraped:
@@ -172,7 +172,7 @@ def import_csv(csvfilename):
                 data_csv.append(columns)
     return data_csv
 
-# -----------------------------------PDF --------------------#
+# -----------------------------------PDF ---------------------------#
 
 
 pdfmetrics.registerFont(TTFont('Arial', 'Arial.ttf'))
@@ -297,7 +297,7 @@ def create_invoice(last_row):
 
 @app.route('/customers')
 def Customer():
-    # print("_________________CSV DATA________________")
+    # print("_________________CSV DATA_________________")
     columns = ['CustomerName', 'CustomerPhoneno', 'Date', 'EmployeeID', 'EmployeeName', 'Invoice NO', 'Quantity', 'Products', 'Total']
     df = pd.read_csv('customer_data.csv', names=columns )
     with open("templates/customer.html", mode="w") as file:
@@ -306,6 +306,22 @@ def Customer():
 
 
 state = 0
+
+
+def check_product(Name):
+    print(f"this is the {Name}")
+    with open('json/products.json') as f1:
+        pro_cons = json.load(f1)
+        pro_con = pro_cons["products"]
+    print("CAME INSIDE FUNTCTION")
+    for i in range(len(pro_con)):
+        print(f"{Name} == {pro_con[i]['name']}")
+        if Name == pro_con[i]['name']:
+            print("The product is found!!")
+            return i
+        else:
+            return -1
+
 
 
 @app.route('/Billing/<user>', methods=['GET', 'POST'])
@@ -339,39 +355,42 @@ def Billing(user):
         print(output.head())
         print(Name)
         print(Quantity)
-        for i in range(len(pro_con)):
-            for m in range(len(Name)):
-                if pro_con[i]["name"] == Name[m]:
-                    pro_con[i]["quantity"] = pro_con[i]["quantity"] - int(Quantity[m])
-                    print(f'{pro_con[i]["quantity"]} = {pro_con[i]["quantity"]} - {int(Quantity[m])}')
-                    print("This is happening")
-                    if pro_con[i]["quantity"] > 0:
-                        print("this came here")
-                        output = output.append(new_row, ignore_index=True)
-                        print(output.head())
-                        print(new_row)
-                        print(f"{state} its True in")
-                        output.to_csv('customer_data.csv', mode='a', header=False, index=False)
-                        data_csv = import_csv("customer_data.csv")
-                        last_row = data_csv[-1]
-                        print(last_row)
-                        create_invoice(last_row)
-                        write_json(pro_cons)
-                        state = 0
-                        return render_template("Billing.html", edata=data, products=pro_con, states=state)
-                    else:
-                        state = 1
-                        print(f"{state} its True from out ")
+        for m in range(len(Name)):
+            index = check_product(Name[m])
+            print(f"The index is+ {index}")
+            if index != -1:
+                pro_con[index]["quantity"] = pro_con[index]["quantity"] - int(Quantity[m])
+                print(f'{pro_con[index]["quantity"]} = {pro_con[index]["quantity"]} - {int(Quantity[m])}')
+                print("This is happening")
+                if pro_con[index]["quantity"] > 0:
+                    print("this came here")
+                    state = 0
                 else:
                     state = 1
-                    print(f"{state} its True from out")
+                    print(f"{state} its True from out this means the values is negative")
+                    break
+            else:
+                state = 1
+                print(f"{state} This means the product is not found")
+                break
         print(type(user))
         print(type(data))
         print(data)
+        if state == 0:
+            output = output.append(new_row, ignore_index=True)
+            print(output.head())
+            print(new_row)
+            print(f"{state} its True in")
+            output.to_csv('customer_data.csv', mode='a', header=False, index=False)
+            data_csv = import_csv("customer_data.csv")
+            last_row = data_csv[-1]
+            print(last_row)
+            create_invoice(last_row)
+            write_json(pro_cons)
+            return render_template("Billing.html", edata=data, products=pro_con, states=state)
         return render_template("Billing.html", edata=data, products=pro_con, states=state)
     else:
         return render_template("Billing.html", edata=data, products=pro_con, states=state)
-
 
 
 @app.route('/download')
@@ -387,7 +406,9 @@ def download():
         print(file_pdf)
         return send_from_directory(directory="static", path=f'files/{file_pdf}')
     return send_from_directory(directory="static", path=f'files/{pdf_file_name}')
-# --------------------------Routs to Admin----------------#
+
+
+# --------------------------Routs to Admin--------------------#
 
 
 @app.route('/admin', endpoint="admin")
@@ -437,7 +458,7 @@ def employee():
             if search_for_employee(emp_list, ID):
                 print("came inside if")
                 emp_list.pop(indexs)
-                print("________________list is____________")
+                print("____________list is____________")
                 print(emp_list)
                 write_jsons(emp)
                 return render_template("employee.html", data=emp_list)
@@ -470,6 +491,10 @@ def products():
             with open('json/products.json') as f1:
                 pro_cons = json.load(f1)
                 pro_con = pro_cons["products"]
+                for i in pro_con:
+                    if new_product["product_id"] == i["product_id"]:
+                        return render_template('products.html', data=pro_con, warning=1)
+
                 pro_con.append(new_product)
 
             write_json(pro_cons)
@@ -483,7 +508,7 @@ def products():
 
             if search(pro_con, ID):
                 pro_con.pop(index)
-                print("________________list is____________")
+                print("____________list is____________")
                 print(pro_con)
                 write_json(pro_cons)
                 return render_template('products.html', data=pro_con)
@@ -504,7 +529,7 @@ def products():
                 pro_con[index]["type"] = imd['Type']
                 pro_con[index]["quantity"] = int(imd['Quantity'])
                 pro_con[index]["price"] = int(imd['Price'])
-                print("________________list is____________")
+                print("____________list is____________")
                 print(pro_con)
                 write_json(pro_cons)
                 return render_template('products.html', data=pro_con)
