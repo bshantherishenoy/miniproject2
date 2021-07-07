@@ -323,7 +323,6 @@ def check_product(Name):
             return -1
 
 
-
 @app.route('/Billing/<user>', methods=['GET', 'POST'])
 def Billing(user):
     print(user)
@@ -441,11 +440,14 @@ def employee():
                 "name": employee_data["Name"],
                 "password": hash_and_salted_password
             }
-
-            with open("json/users.json") as file:
-                emp = json.load(file)
+            with open('json/users.json') as f1:
+                emp = json.load(f1)
                 emp_list = emp["employee"]
-                emp_list.append(new_emp)
+                for i in emp_list:
+                    if new_emp["employee_id"] == i["employee_id"]:
+                        return render_template('employee.html', data=emp_list, warning=2)
+
+            emp_list.append(new_emp)
             write_jsons(emp)
             return render_template('employee.html', data=emp_list)
 
