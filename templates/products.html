@@ -56,7 +56,7 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body text-center">
-                        <form class="form-signin needs-validation" novalidate action="{{url_for('products')}}" method="post">
+                        <form  action="{{url_for('products')}}" method="post">
                             <h1 class="h3 mb-3 font-weight-normal">Product Details</h1>
                             <input value="{{1+data[-1]['product_id']}}" type="text" id="inputId" class="form-control" placeholder="" name="Product Id" required>
                             <br>
@@ -84,10 +84,10 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body text-center">
-                        <form class="form-signin" action="{{url_for('products')}}" method="post">
+                        <form action="{{url_for('products')}}" method="post">
                             <h1 class="h3 mb-3 font-weight-normal">Product Details</h1>
                             <label>Enter ProductID</label>
-                            <input  type="text" id="inputId1" class="form-control" placeholder="" name="Product Id">
+                            <input  type="text" id="inputId1" class="form-control" placeholder="" name="Product Id" required>
                             <br>
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                             <button type="submit"  name="post" value="Deleting" class="btn btn-primary">Save changes</button>
@@ -105,17 +105,17 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body text-center">
-                        <form class="form-signin" action="{{url_for('products')}}" method="post">
+                        <form  action="{{url_for('products')}}" method="post">
                             <h1 class="h3 mb-3 font-weight-normal">Product Details</h1>
-                            <input  type="text" id="inputId2" class="form-control" placeholder="Product ID" name="Product Id">
+                            <input  type="text" id="inputId2" class="form-control" placeholder="Product ID" name="Product Id" required>
                             <br>
-                            <input type="text" id="inputName2" class="form-control" placeholder="Name" name="Name">
+                            <input type="text" id="inputName2" class="form-control" placeholder="Name" name="Name" required>
                             <br>
-                            <input type="text" id="inputType2" class="form-control" placeholder="Type" name="Type">
+                            <input type="text" id="inputType2" class="form-control" placeholder="Type" name="Type" required>
                             <br>
-                            <input type="text" id="inputQuantity2" class="form-control" placeholder="Quantity" name="Quantity">
+                            <input type="text" id="inputQuantity2" class="form-control" placeholder="Quantity" name="Quantity" required>
                             <br>
-                            <input type="text" id="inputPrice2" class="form-control" placeholder="Price" name="Price">
+                            <input type="text" id="inputPrice2" class="form-control" placeholder="Price" name="Price" required>
                             <br>
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                             <button type="submit"  name="post" value="Modifying" class="btn btn-primary">Save changes</button>

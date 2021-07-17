@@ -314,13 +314,22 @@ def check_product(Name):
         pro_cons = json.load(f1)
         pro_con = pro_cons["products"]
     print("CAME INSIDE FUNTCTION")
+    found = False
+    pos = None
     for i in range(len(pro_con)):
         print(f"{Name} == {pro_con[i]['name']}")
         if Name == pro_con[i]['name']:
             print("The product is found!!")
-            return i
+            found = True
+            pos = i
+            break
         else:
-            return -1
+            found = False
+
+    if found:
+        return pos
+    else:
+        return -1
 
 
 @app.route('/Billing/<user>', methods=['GET', 'POST'])

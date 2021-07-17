@@ -51,7 +51,7 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body text-center">
-                        <form class="form-signin needs-validation" novalidate action="{{url_for('employee')}}" method="post">
+                        <form  action="{{url_for('employee')}}" method="post">
                             <h1 class="h3 mb-3 font-weight-normal">Employee Details</h1>
                             <input  type="text" id="employeeId" class="form-control" placeholder="" name="Employee Id" required>
                             <br>
@@ -75,10 +75,10 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body text-center">
-                        <form class="form-signin" action="{{url_for('employee')}}" method="post">
+                        <form action="{{url_for('employee')}}" method="post">
                             <h1 class="h3 mb-3 font-weight-normal">Employee Details</h1>
                             <label>Enter Employee ID</label>
-                            <input  type="text" id="inputId1" class="form-control" placeholder="" name="Employee Id">
+                            <input  type="text" id="inputId1" class="form-control" placeholder="" name="Employee Id" required>
                             <br>
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                             <button type="submit"  name="post" value="Deleting" class="btn btn-primary">Save changes</button>
