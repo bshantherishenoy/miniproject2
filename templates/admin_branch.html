@@ -1,0 +1,51 @@
+{% extends "baseadmin.html" %}
+{% block content %}
+                <main>
+                    <div class="text-center">
+                        <div class="container" style="margin-top:100px;margin-left:220px;" >
+                            <h4>Current Branches</h4>
+                            <table class="table">
+
+                                <thead>
+                                  <tr>
+                                    <th scope="col">#</th>
+                                    <th scope="col">Branch Name</th>
+                                    <th scope="col">Branch Loaction</th>
+                                    <th scope="col">Operation</th>
+                                    <th scope="col">Operation</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                    {% for i in data%}
+                                  <tr>
+                                    <th scope="row">{{i.branch_id}}</th>
+                                    <td>{{i.branch_name}}</td>
+                                    <td>{{i.branch_location}}</td>
+                                    <td><a class="btn btn-warning" href="{{url_for('editbranch',branch_id=i.branch_id)}}" role="button">Edit</a></td>
+                                    <td><a class="btn btn-danger" href="{{url_for('deletebranch',branch_id=i.branch_id)}}" role="button">Delete</a></td>
+                                  </tr>
+                                  {% endfor %}
+                                </tbody>
+                            </table>
+                            <a class="btn btn-success" href="{{url_for('addbranch')}}" role="button">Add</a>
+                        </div>
+                    </div>
+
+                </main>
+                <footer>
+                  {% with messages = get_flashed_messages(with_categories=true) %}
+                  {% if messages %}
+                    {% for category, message in messages %}
+                        {% if category == 'message' %}
+                          <div class="alert alert-warning alert-dismissible fade show" role="alert">    
+                        {% else %}
+                          <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {% endif %}
+                          {{ message }}
+                          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                  {% endif %}
+              {% endwith %}
+                </footer>
+{% endblock %}

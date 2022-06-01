@@ -1,17 +1,10 @@
 {
     "products": [
         {
-            "product_id": 7,
-            "name": "Toolbox",
-            "type": "hardware",
-            "quantity": 18,
-            "price": 40
-        },
-        {
             "product_id": 3,
             "name": "Lawnmover",
             "type": "Agriculture",
-            "quantity": 38,
+            "quantity": 22,
             "price": 90
         },
         {
@@ -23,10 +16,24 @@
         },
         {
             "product_id": 5,
-            "name": "Spoon",
+            "name": "Battery",
             "type": "hardware",
-            "quantity": 99,
-            "price": 10
+            "quantity": 24,
+            "price": 100
+        },
+        {
+            "product_id": 6,
+            "name": "Driver",
+            "type": "hardware",
+            "quantity": 88,
+            "price": 40
+        },
+        {
+            "product_id": 7,
+            "name": "Fork",
+            "type": "Tool",
+            "quantity": 98,
+            "price": 40
         }
     ]
 }
