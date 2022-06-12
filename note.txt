@@ -1,0 +1,21 @@
+Admin Pannel
+-------------
+1) Messaging with respect to the socket  connection:
+2) Having sessions with respect to the users login with respect to the control
+
+Branch Dashboard:
+------------------
+Performance with respect to the branch:
+History data:
++++++++++++++
+1)Get the most sold products and the least sold products
+2)Getting the sold products type for the conviniance 
+3)Analyzing the performace monthly sales
+-->pie chart, line graph , total sales and the reveue of the shop
+4)Employee analysis based on their check-ins
+5) socket and session management with respect to the performace
+
+Future Sales prediction with respect to the data:
+--------------------------------------------------
+1) Finding the forcast for the sales of the branch for the next month 
+2) Keeping the count of the next month how much products to keep in the shop.

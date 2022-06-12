@@ -1,11 +1,131 @@
-{% extends "baseadmin.html" %}
-{% block content %}
-                <main>
-                    <div class="text-center">
-                        <div class="container" style="margin-top:100px;margin-left:220px;" >
-                            <h4>Branch Performance</h4>
-                        </div>
-                    </div>
+{% extends "baseadmin.html" %} {% block content %}
+<main>
+  <script src="https://cdn.anychart.com/releases/8.0.1/js/anychart-core.min.js"></script>
+  <script src="https://cdn.anychart.com/releases/8.0.1/js/anychart-pie.min.js"></script>
+  <div class="text-center">
+    <div class=".chart-container" style="margin-top: 70px; margin-left: 240px">
+      <h4>Performance</h4>
+      <div>
+        <table class="table table-borderless">
+          <tbody>
+            <tr>
+              <td>
+                <canvas
+                  id="barchart1"
+                  style="width: 100%; max-width: 600px"
+                ></canvas>
+              </td>
+              <td>
+                <canvas
+                  id="pieChart1"
+                  style="width: 80%; max-width: 400px"
+                ></canvas>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <canvas
+                  id="lineChart1"
+                  style="width: 100%; max-width: 500px"
+                ></canvas>
+              </td>
+              <td>
+                <table class="table table-bordered">
+                  <tbody style="text-align: center;">
+                    <tr>
+                      <td>Total Revenue generated:</td>
+                      <td ><strong>{{total_revenue}}</strong><br><span>This includes all the month's data</span></td>
+                    </tr>
+                    <tr>
+                      <td>Net Profit</td>
+                      <td>{{net_price}}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="container"></div>
+    </div>
+    <script>
 
-                </main>
+                let xValues = {{ branches|safe }};
+
+                var yValues = {{ revenue|safe }};
+                var barColors = ["red", "green", "blue", "orange", "brown"];
+
+                new Chart("barchart1", {
+                  type: "bar",
+                  data: {
+                    labels: xValues,
+                    datasets: [
+                      {
+                        backgroundColor: barColors,
+                        data: yValues,
+                      },
+                    ],
+                  },
+                  options: {
+                    legend: { display: false },
+                    title: {
+                      display: true,
+                      text: "Performace with respect to each branch",
+                    },
+                  },
+                });
+          var x = {{ products|safe }};
+          var y = {{ values|safe }};
+          var barColors = [
+            "#b91d47",
+            "#00aba9",
+            "#2b5797",
+            "#e8c3b9",
+            "#1e7145"
+          ];
+
+          new Chart("pieChart1", {
+            type: "pie",
+            data: {
+              labels: x,
+              datasets: [{
+                backgroundColor: barColors,
+                data: y
+              }]
+            },
+            options: {
+              title: {
+                display: true,
+                text: "Sales in type of products"
+              }
+            }
+          });
+          var xV  = {{ dates|safe }};
+         var yV = {{sales|safe}};
+
+      new Chart("lineChart1", {
+        type: "line",
+        data: {
+          labels: xV,
+          datasets: [{
+            fill: false,
+            lineTension: 0,
+            backgroundColor: "rgba(0,0,255,1.0)",
+            borderColor: "rgba(0,0,255,0.1)",
+            data: yV
+          }]
+        },
+        options: {
+          legend: {display: false},
+          title: {
+                display: true,
+                text: "Sales per month"
+              }
+    
+        }
+      });
+    </script>
+  </div>
+</main>
 {% endblock %}

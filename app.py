@@ -25,6 +25,7 @@ from sqlalchemy.orm import relationship
 from flask_login import LoginManager
 import traceback
 import sys
+from modules.service_admin import Admin_Dashboard
 
 
 
@@ -67,7 +68,7 @@ class Admin(db.Model):
 
 
 
-#db.create_all()
+# db.create_all()
 
 # -----------------------config---------------------------#
 
@@ -170,16 +171,10 @@ def home():
         return render_template("register.html")
 # --------------------------- Main Routes to Branch ----------------------#
 
-
-
-
-
-
 @app.route('/branch',methods=['GET','POST'])
 def main_branch():
     if request.method == "GET":
-        my_var = session.get('my_var', None)
-        return render_template("branch.html",my_var=my_var)
+        return render_template("branch.html")
 
 
 
@@ -205,7 +200,36 @@ def main_branch():
 # ------------------------------Main Routes to Admin---------------------
 @app.route('/Admin_Pannel',methods=['GET'])
 def main_render():
-    return render_template("admin.html")
+    data = Admin_Dashboard()
+    total_revenue,net_price= data.generate_revenue()
+    
+    branch_revenue = data.generate_branch_revenue()
+    from_db = Branch.query.order_by(Branch.branch_name).all()
+    branches = [i.branch_name.upper() for i in from_db ]
+    
+    print(branches)
+    print(branch_revenue)
+    
+    revenue = list(branch_revenue.items())
+    types = data.generate_type_used()
+    products = list(types.keys())
+    values = list(types.values())
+    monthly = data.generate_monthly_sales()
+    months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sept","Oct","Nov","Dec"]
+    d = list(monthly.keys())
+    month = [months[d[i].month - 1] for i in range(len(d))]
+    sales = list(monthly.values())
+   
+    return render_template("admin.html", 
+                           revenue = revenue,
+                           branches = branches,
+                           total_revenue=total_revenue,
+                           net_price = net_price,
+                           products = products,
+                           values = values,
+                           dates = month,
+                           sales = sales
+                           )
     
 
 @app.route('/admin_branch',methods=['GET','POST'])
