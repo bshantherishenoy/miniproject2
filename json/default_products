@@ -7,7 +7,7 @@
             "Product_Property": 1.6,
             "Company": "Simco",
             "Price": 418,
-            "Quantity": 48
+            "Quantity": 50
         },
         {
             "Product_Id": 2,
@@ -16,7 +16,7 @@
             "Product_Property": 1.4,
             "Company": "Tata",
             "Price": 250,
-            "Quantity": 48
+            "Quantity": 50
         },
         {
             "Product_Id": 3,
@@ -25,7 +25,7 @@
             "Product_Property": "NA",
             "Company": "Simco",
             "Price": 385,
-            "Quantity": 49
+            "Quantity": 48
         },
         {
             "Product_Id": 4,
@@ -34,7 +34,7 @@
             "Product_Property": 1.6,
             "Company": "Simco",
             "Price": 408,
-            "Quantity": 49
+            "Quantity": 50
         },
         {
             "Product_Id": 5,

@@ -9,7 +9,7 @@ import json
 
 class Admin_Dashboard:
     def __init__(self):
-        self.df = pd.read_csv("C://Users//shant//Downloads//Billingcsvdata.csv")
+        self.df = pd.read_csv("C://Users//shant//PycharmProjects//pythonProject//miniproject2//bill_stick.csv")
     def generate_revenue(self):
         # Getting the total  revenue of data
         total_revenue = self.df.Total_price.sum()

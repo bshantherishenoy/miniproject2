@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "branch_base.html" %}
 {% block content %}
     <div class="container" style="margin-top:160px;padding-left:240px;text-align: center;">
         <h1>Employee Section</h1>
@@ -21,21 +21,21 @@
         </div>
         {% endif %}
 
-        <div style="with:100%">
+        <div style="width:100%">
             <table  class="table table-responsive" id="displaytable" style="display:none; overflow:auto;margin-top:10px;width:100%" border="3"  >
                 <thead>
                 <tr>
                     <td style="padding:5px 10px"><strong>Employee Id</strong></td>
                     <td style="padding:5px 10px" ><strong>Name</strong></td>
-                    <td style="padding:5px 10px"><strong>Password</strong></td>
+                    <td style="padding:5px 10px"><strong>Branch</strong></td>
                 </tr>
                 </thead>
                 <tbody>
                 {%for i in data: %}
                 <tr>
-                    <td style="padding:5px 10px">{{i["employee_id"]}}</td>
-                    <td>{{i["name"]}}</td>
-                    <td>{{i["password"]}}</td>
+                    <td style="padding:5px 10px">{{i.user_id}}</td>
+                    <td>{{i.user_username}}</td>
+                    <td>{{i.user_branch}}</td>
                 </tr>
                 {% endfor %}
                 </tbody>

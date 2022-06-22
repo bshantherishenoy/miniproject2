@@ -19,3 +19,20 @@ Future Sales prediction with respect to the data:
 --------------------------------------------------
 1) Finding the forcast for the sales of the branch for the next month 
 2) Keeping the count of the next month how much products to keep in the shop.
+----
+1,
+Tony Ballal,
+9161093554,
+21-01-2022,
+202,
+Ramesh,
+KOR,
+444d1655-3f8e-431c-9d55-a37ad419bef4,
+67,
+Agricultural Tools,
+Axe Tamilnadu Pattern,
+Mathana,
+quantity  : 10,
+price per quantity :400,
+total price :4000,
+net price of a quantity :348

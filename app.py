@@ -26,21 +26,25 @@ from flask_login import LoginManager
 import traceback
 import sys
 from modules.service_admin import Admin_Dashboard
-
+from modules.service_branch import Branch_Service
+from flask_session import Session
+import numpy as np
 
 
 # ---------------------Initializing Dataframe ------------#
 output = pd.DataFrame()
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'secret-key-goes-here'
+
+app.config['SECRET_KEY'] = 'vnkdjnfjknfl1232#'
+app.config['SESSION_TYPE'] = "filesystem"
 
 Bootstrap(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI', "sqlite:///hardwareshop45.db")
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
-
+Session(app)
 
 index = None
 indexs = None
@@ -59,7 +63,7 @@ class Users(db.Model):
     user_id = db.Column(db.Integer, primary_key=True)
     user_username = db.Column(db.String(100), nullable=False,unique=True)
     user_password = db.Column(db.String(16), nullable=False)
-    user_branch = db.Column(db.Integer, db.ForeignKey("branch.branch_id"),primary_key=True)
+    user_branch = db.Column(db.Integer, db.ForeignKey("branch.branch_id"))
 class Admin(db.Model):
     admin_id = db.Column(db.Integer,primary_key = True)
     admin_name = db.Column(db.String(20),nullable=False)
@@ -68,7 +72,7 @@ class Admin(db.Model):
 
 
 
-# db.create_all()
+db.create_all()
 
 # -----------------------config---------------------------#
 
@@ -99,7 +103,7 @@ def remove_prefix(text, prefix):
 # --------------------------------Data----------------------------#
 
 
-def write_json(data, filename="json/default_products"):
+def write_json(data, filename="json/default_products.json"):
     with open(filename, "w") as f:
         json.dump(data, f, indent=4)
 
@@ -143,7 +147,10 @@ def home():
             if Admin.query.filter_by(admin_id=data["id"]).first():
                 db = Admin.query.filter_by(admin_id=data["id"]).first()
                 print(data)
+                
                 if data["password"] == db.admin_password:
+                    session["type"] = "Admin"
+                    session["username"]  =  data["id"]
                     return redirect('/Admin_Pannel')
                 else:
                     flash("Invalid Password","info")
@@ -154,7 +161,8 @@ def home():
             if Branch.query.filter_by(branch_id=data["id"]).first():
                 app = Branch.query.filter_by(branch_id=data["id"]).first()
                 if app.branch_name == data["password"]:
-                    session['my_var'] = app.branch_name
+                    session["type"] = "Branch"
+                    session["username"]  =  data["id"]
                     return redirect("/branch")
                 else:
                     flash("Invalid Password" ,"info")     
@@ -163,7 +171,11 @@ def home():
         if select == 3:
             if Users.query.filter_by(user_id=data["id"]).first():
                 data = Users.query.filter_by(user_id=data["id"]).first()
+                session["type"] = "Employee"
+                session["username"]  =  data.user_id
                 flash("Login Successful")
+                return redirect("/Employee_login")
+            
             else:
                 flash("There is no such User","danger")
         return render_template("register.html")
@@ -172,9 +184,40 @@ def home():
 # --------------------------- Main Routes to Branch ----------------------#
 
 @app.route('/branch',methods=['GET','POST'])
-def main_branch():
-    if request.method == "GET":
-        return render_template("branch.html")
+def main_branch():  
+    id = session.get('username')
+    branch_manager = Branch.query.filter_by(branch_id=id).first()
+    branch = Branch_Service(branch_manager)
+    # ----------Net price and revenue ------------- #
+    net_price,total_price = branch.generate_revenue()
+    # ----------Generate Monthly Sales ------------ #
+    monthly = branch.generate_monthly_sales()
+    months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sept","Oct","Nov","Dec"]
+    d = list(monthly.keys())
+    month = [months[d[i].month - 1] for i in range(len(d))]
+    sales = list(monthly.values())
+    # -------- Top 5 company    ----------------#
+    types = branch.top_five_selling_company()
+    print(types)
+    products = list(types.keys())
+    values = list(types.values())
+    # -------- Top 25 products    ---------------#
+    best_products = branch.generate_most_sold_products()['count']
+    # -------- Types of the products being sold ------ #
+    product_types = branch.generate_type_used()
+    data_types = list(product_types.keys())
+    data_values = list(product_types.values())    
+    return render_template("branch.html",
+                           branch_manager=branch_manager,
+                           net_price=net_price,
+                           total_price = total_price,
+                           sales=sales,
+                           months=month,
+                           products=products,
+                           values = values,
+                           best_products=best_products,
+                           data_types = data_types,
+                           data_values = data_values)
 
 
 
@@ -286,17 +329,13 @@ def events():
     return render_template("events.html")
 
 
-@app.route('/Employee_login/<user>', methods=["GET", "POST"])
-def Employee_login(user):
-    if type(user) is dict:
-        return render_template("Employee_login.html", edata=user)
-    else:
-        x = user.replace("'", '"')
-        data = json.loads(x)
-        print(type(data))
-        return render_template("Employee_login.html", edata=data)
-
-
+@app.route('/Employee_login', methods=["GET", "POST"])
+def Employee_login():
+    id = session.get('username')
+    edata = Users.query.filter_by(user_id=id).first()
+    return render_template("Employee_login.html", edata=edata)
+   
+  
 # --------------------------READ CSV------------------------#
 def import_csv(csvfilename):
     data_csv = []
@@ -448,15 +487,15 @@ state = 0
 
 def check_product(Name):
     print(f"this is the {Name}")
-    with open('json/default_products') as f1:
+    with open('json/default_products.json') as f1:
         pro_cons = json.load(f1)
         pro_con = pro_cons["products"]
     print("CAME INSIDE FUNTCTION")
     found = False
     pos = None
+    Name = int(Name)
     for i in range(len(pro_con)):
-        print(f"{Name} == {pro_con[i]['name']}")
-        if Name == pro_con[i]['name']:
+        if Name == pro_con[i]['Product_Id']:
             print("The product is found!!")
             found = True
             pos = i
@@ -469,14 +508,20 @@ def check_product(Name):
     else:
         return -1
 
+def product_details(product_id):
+    with open("json//refactored_products.json") as file:
+        data = json.load(file)
+    data = data["products"]
+    return data[int(product_id)-1]
+    
 
-@app.route('/Billing/<user>', methods=['GET', 'POST'])
-def Billing(user):
-    print(user)
-    x = user.replace("'", '"')
-    data = json.loads(x)
-    print(type(data))
-    with open('json/default_products') as f1:
+
+@app.route('/Billing', methods=['GET', 'POST'])
+def Billing():
+    id = session.get('username')
+    employee_details = Users.query.filter_by(user_id=id).first()
+    
+    with open('json/default_products.json') as f1:
         pro_cons = json.load(f1)
         pro_con = pro_cons["products"]
     global output, state
@@ -484,60 +529,51 @@ def Billing(user):
         print("POST HAPPENED")
         datas = request.form
         print(datas)
-        new_row = {
-            "Invoice NO": datas["Invoice No"],
-            "EmployeeId": datas["EmployeeId"],
-            "CustomerName": datas["CustomerName"],
-            "CustomerPhoneno": datas["CustomerPhoneno"],
-            "Date": datas["Date"],
-            "EmployeeName": datas["EmployeeName"],
-            "Products": request.form.getlist('name'),
-            "Price": request.form.getlist('value'),
-            "Total": datas['TotalPrice']
-        }
+        
 
         Name = request.form.getlist('name')
         Quantity = request.form.getlist('value')
-        print(output.head())
-        print(Name)
-        print(Quantity)
+        
         for m in range(len(Name)):
             index = check_product(Name[m])
             print(f"The index is+ {index}")
             if index != -1:
-                pro_con[index]["quantity"] = pro_con[index]["quantity"] - int(Quantity[m])
-                print(f'{pro_con[index]["quantity"]} = {pro_con[index]["quantity"]} - {int(Quantity[m])}')
-                print("This is happening")
-                if pro_con[index]["quantity"] > 0:
-                    print("this came here")
+                pro_con[index]["Quantity"] = pro_con[index]["Quantity"] - int(Quantity[m])
+                print(f'{pro_con[index]["Quantity"]} = {pro_con[index]["Quantity"]} - {int(Quantity[m])}')
+                if pro_con[index]["Quantity"] > 0:
                     state = 0
                 else:
-                    pro_con[index]["quantity"] = pro_con[index]["quantity"] + int(Quantity[m])
+                    pro_con[index]["Quantity"] = pro_con[index]["Quantity"] + int(Quantity[m])
                     state = 1
-                    print(f"{state} its True from out this means the values is negative")
                     break
             else:
                 state = 1
-                print(f"{state} This means the product is not found")
                 break
-        print(type(user))
-        print(type(data))
-        print(data)
-        if state == 0:
-            output = output.append(new_row, ignore_index=True)
-            print(output.head())
-            print(new_row)
-            print(f"{state} its True in")
-            output.to_csv('customer_data.csv', mode='a', header=False, index=False)
-            data_csv = import_csv("customer_data.csv")
-            last_row = data_csv[-1]
-            print(last_row)
-            create_invoice(last_row)
-            write_json(pro_cons)
-            return render_template("Billing.html", edata=data, products=pro_con, states=state)
-        return render_template("Billing.html", edata=data, products=pro_con, states=state)
+      
+            if state == 0:
+                product_in = product_details(Name[m])               
+                new_row = {
+                        "name": datas["CustomerName"],
+                        "phno": datas["CustomerPhoneno"],
+                        "date": datas["Date"],
+                        "employee_id": datas["EmployeeId"],
+                        "employee_name": datas["EmployeeName"],
+                        "branch" : employee_details.user_branch,
+                        "ids": datas["Invoice No"],
+                        "product_id": Name[m],
+                        "product_type":product_in["Product_type"],
+                        "product_name":product_in["Product_name"],
+                        "product_company":product_in["Company"],
+                        "Quantity_ordered": Quantity[m],
+                        "Price of commodity":product_in["Price"],
+                        "Total_Price": datas['TotalPrice'],
+                        "net_price": product_in["net_price"]
+                    }
+                output = output.append(new_row, ignore_index=True)
+        output.to_csv('customer_data.csv', mode='a', header=False, index=False)       
+        return render_template("Billing.html", edata=employee_details, products=pro_con, states=state)
     else:
-        return render_template("Billing.html", edata=data, products=pro_con, states=state)
+        return render_template("Billing.html", edata=employee_details, products=pro_con, states=state)
 
 
 @app.route('/download')
@@ -564,66 +600,52 @@ def admin():
     return render_template('admin.html')
 
 
-# @app.route('/shit', endpoint="shit")
-# @validate_upload
-# def shit():
-#     return '<h1>Shit working!!</h1>'
 
 
 @app.route('/employee', methods=['GET', 'POST'], endpoint="employee")
-@validate_upload
 def employee():
+    id = session.get('username')
+    branch_manager = Branch.query.filter_by(branch_id=id).first()
     if request.method == "POST":
         employee_data = request.form
         print(employee_data)
         if employee_data["post"] == 'adding':
+            # Creating the employee 
             hash_and_salted_password = generate_password_hash(
                 employee_data["Password"],
                 method='pbkdf2:sha256',
                 salt_length=8
             )
-            new_emp = {
-                "employee_id": employee_data["Employee Id"],
-                "name": employee_data["Name"],
-                "password": hash_and_salted_password
-            }
-            with open('json/users.json') as f1:
-                emp = json.load(f1)
-                emp_list = emp["employee"]
-                for i in emp_list:
-                    if new_emp["employee_id"] == i["employee_id"]:
-                        return render_template('employee.html', data=emp_list, warning=2)
-
-            emp_list.append(new_emp)
-            write_jsons(emp)
-            return render_template('employee.html', data=emp_list)
+            new_emp = Users(
+                user_id = employee_data["Employee Id"],
+                user_username = employee_data["Name"],
+                user_password =  hash_and_salted_password,
+                user_branch = branch_manager.branch_name
+            )
+            db.session.add(new_emp)
+            db.session.commit()
+            emp_list = Users.query.order_by(Users.user_username).all()
+            return render_template('employee.html', data=emp_list,branch_manager =branch_manager)
 
         elif employee_data['post'] == 'Deleting':
-            ID = int(employee_data['Employee Id'])
-            with open('json/users.json') as f1:
-                emp = json.load(f1)
-                emp_list = emp["employee"]
-            f1.close()
-            print("came here")
-            if search_for_employee(emp_list, ID):
-                print("came inside if")
-                emp_list.pop(indexs)
-                print("____________list is____________")
-                print(emp_list)
-                write_jsons(emp)
-                return render_template("employee.html", data=emp_list)
-            else:
-                return render_template('employee.html', data=emp_list, warning=1)
+            ID = employee_data['Employee Id']
+            Users.query.filter_by(user_id=ID).delete()
+            try:
+                db.session.commit()
+                emp_list = Users.query.order_by(Users.user_username).all()
+                return render_template("employee.html", data=emp_list,branch_manager =branch_manager)
+            except:
+                return render_template('employee.html', data=emp_list, warning=1,branch_manager =branch_manager)            
 
     else:
-        with open("json/users.json") as file:
-            contents = json.load(file)
-            employees = contents["employee"]
-        return render_template('employee.html', data=employees)
+        emp_list = Users.query.order_by(Users.user_username).all()
+        return render_template('employee.html', data=emp_list,branch_manager =branch_manager)
 
 
 @app.route('/products', methods=['GET', 'POST'], endpoint="products")
 def products():
+    id = session.get('username')
+    branch_manager = Branch.query.filter_by(branch_id=id).first()
     global index
     if request.method == "POST":
         imd = request.form
@@ -642,12 +664,12 @@ def products():
                 pro_con = pro_cons["products"]
                 for i in pro_con:
                     if new_product["Product_Id"] == i["Product_Id"]:
-                        return render_template('products.html', data=pro_con, warning=1)
+                        return render_template('products.html',branch_manager=branch_manager, data=pro_con, warning=1)
 
                 pro_con.append(new_product)
 
             write_json(pro_cons)
-            return render_template('products.html', data=pro_con)
+            return render_template('products.html', data=pro_con,branch_manager=branch_manager)
 
         elif imd['post'] == 'Deleting':
             ID = int(imd['Product Id'])
@@ -660,9 +682,9 @@ def products():
                 print("____________list is____________")
                 print(pro_con)
                 write_json(pro_cons)
-                return render_template('products.html', data=pro_con,warning=0)
+                return render_template('products.html', data=pro_con,warning=0,branch_manager=branch_manager)
             else:
-                return render_template('products.html', data=pro_con, warning=1)
+                return render_template('products.html', data=pro_con, warning=1,branch_manager=branch_manager)
 
         elif imd['post'] == 'Modifying':
             print(imd)
@@ -681,18 +703,18 @@ def products():
                 print("____________list is____________")
                 print(pro_con)
                 write_json(pro_cons)
-                return render_template('products.html', data=pro_con)
+                return render_template('products.html', data=pro_con,branch_manager=branch_manager)
             else:
                 flash("Invalid ID","info")
-                return render_template('products.html', data=pro_con)
+                return render_template('products.html', data=pro_con,branch_manager=branch_manager)
 
     else:
         with open('json/default_products.json') as f1:
             pro_cons = json.load(f1)
             pro_con = pro_cons["products"]
-        return render_template('products.html', data=pro_con)
+        return render_template('products.html', data=pro_con,branch_manager=branch_manager)
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", debug=True, port=port)
+    app.run( debug=True)
 

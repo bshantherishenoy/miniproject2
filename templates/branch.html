@@ -1,10 +1,163 @@
-{% extends "branch_base.html" %}
-{% block content %}
-                <main>
-                    <div class="text-center">
-                        <div class="container" style="margin-top:100px;margin-left:220px;" >
-                            <h4>Branch Performance</h4>
-                        </div>
-                    </div>
-                </main>
+{% extends "branch_base.html" %} {% block content %}
+<main>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
+  <script
+    type="text/javascript"
+    src="https://www.gstatic.com/charts/loader.js"
+  ></script>
+  <div class="text-center">
+    <div class="container" style="margin-top: 60px; margin-left: 220px">
+      <h4>Branch Performance</h4>
+
+      <table class="table table-borderless">
+        <tbody>
+          <tr>
+            <td>Total Price</td>
+            <td>
+              <strong style="font-size: 24px"
+                >{{'{:,}'.format(total_price) }}</strong
+              ><br /><span>Denotes the total revenue generated so far.</span>
+            </td>
+            <td>Net Price</td>
+            <td>
+              <strong style="font-size: 24px"
+                >{{'{:,}'.format(net_price) }}</strong
+              ><br /><span>Denotes the net price sum.</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <table class="table table-borderless">
+        <tbody>
+          <tr>
+            <td>
+              <canvas
+                id="LineGraph1"
+                style="max-width: 600px"
+              ></canvas>
+            </td>
+            <td>
+             <h3 style="text-align:center;color:#1B262C">Top 25 products sold</h3>
+             <table class="table" style="height: 300px;width:500px;overflow-y: scroll;display:block;">
+              <thead>
+                <tr>
+                  <th scope="col">#</th>
+                  <th scope="col">Product Name</th>
+                  <th scope="col">Product Company</th>
+                  <th scope="col">Quantity sold</th>
+                </tr>
+              </thead>
+              <tbody>
+              {% set count = namespace(value=0)%}
+              {% for i,j in best_products.items():%}
+                  {% set count.value = count.value + 1 %}
+                  <tr>
+                    <td>{{ count.value }}</td>
+                    <td>{{i[0]}}</td>
+                    <td>{{i[1]}}</td>
+                    <td>{{j}}</td>
+                  </tr> 
+              {% endfor %}
+              </tbody>
+             </table>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <canvas
+                id="barchart1"
+                style="width: 100%; max-width: 600px"
+              ></canvas>
+            </td>
+            <td>
+              <canvas
+                id="pieChart1"
+                style="width: 80%; max-width: 600px"
+              ></canvas>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</main>
+<script>
+  // Line graph
+    var xValues = {{ months|safe }};
+    var yValues = {{ sales |safe }};
+
+
+    new Chart("LineGraph1", {
+      type: "line",
+      data: {
+        labels: xValues,
+        datasets: [{
+          fill: false,
+          lineTension: 0,
+          backgroundColor: "#B25068",
+          borderColor: "#4C3A51",
+          data: yValues
+        }]
+      },
+      options: {
+        legend: {display: false},
+        title: {
+          display: true,
+          text: "Performace of the branch",
+        },
+      }
+    });
+    // Bar Graph
+    var x = {{data_types|safe }};
+    var y = {{data_values|safe }};
+    var barColors = [
+      "#371B58",
+      "#4C3575",
+      "#5B4B8A",
+      "#D5D8B5",
+      "#CA82FF"
+    ];
+
+    new Chart("pieChart1", {
+      type: "pie",
+      data: {
+        labels: x,
+        datasets: [{
+          backgroundColor: barColors,
+          data: y
+        }]
+      },
+      options: {
+        title: {
+          display: true,
+          text: "Sales in type of products"
+        }
+      }
+    });
+    // Bar graph
+
+  let xVal = {{ products|safe }};
+  var yVal = {{ values|safe }};
+  var barColors = ["#371B58","#4C3575","#5B4B8A","#D5D8B5","#CA82FF","#1F4690", "#3A5BA0", "#FFA500", "#FFE5B4", "#293462","#F24C4C","#EC9B3B","#F7D716"];
+
+  new Chart("barchart1", {
+    type: "horizontalBar",
+    data: {
+      labels: xVal,
+      datasets: [
+        {
+          backgroundColor: barColors,
+          data: yVal,
+        },
+      ],
+    },
+    options: {
+      legend: { display: false },
+      title: {
+        display: true,
+        text: "Performace with respect to each branch",
+      },
+    },
+  });
+</script>
 {% endblock %}

@@ -19,7 +19,7 @@
                     {% endif %}
                     <form class="was-validation pl-sm-2 bg-dark s" style="color:white;">
                         <div class="form-row pr-2">
-                            <label for="item-name" class="col-sm-4 text-left fruit-input">Item Name : </label>
+                            <label for="item-name" class="col-sm-4 text-left fruit-input">Item ID : </label>
                             <input  type="text" class='col-sm-7 mb-sm-2 form-control' id="item-name" name="item-name" placeholder="Item name" required>
                         </div>
 
@@ -51,6 +51,8 @@
                             <td style="padding:5px 10px"><strong>Product Id</strong></td>
                             <td style="padding:5px 10px" ><strong>Name</strong></td>
                             <td style="padding:5px 10px"><strong>Type</strong></td>
+                            <td  style="padding:5px 10px"><strong>Company</strong></td>
+                            <td  style="padding:5px 10px"><strong>Property</strong></td>
                             <td style="padding:5px 10px" ><strong>Quantity</strong></td>
                             <td  style="padding:5px 10px"><strong>Price</strong></td>
                         </tr>
@@ -58,11 +60,13 @@
                         <tbody>
                         {%for i in products: %}
                         <tr>
-                            <td style="padding:5px 10px">{{i["product_id"]}}</td>
-                            <td>{{i["name"]}}</td>
-                            <td>{{i["type"]}}</td>
-                            <td>{{i["quantity"]}}</td>
-                            <td>{{i["price"]}}</td>
+                            <td style="padding:5px 10px">{{i["Product_Id"]}}</td>
+                            <td>{{i["Product_name"]}}</td>
+                            <td>{{i["Product_type"]}}</td>
+                            <td>{{i["Company"]}}</td>
+                            <td>{{i["Product_Property"]}}</td>
+                            <td>{{i["Quantity"]}}</td>
+                            <td>{{i["Price"]}}</td>
                         </tr>
                         {% endfor %}
                         </tbody>
@@ -79,7 +83,7 @@
                         </div>
                         <div class="col-lg-2">
                             <label>Employee ID</label>
-                            <input name="EmployeeId" form="list" value="{{edata.Id}}" required>
+                            <input name="EmployeeId" form="list" value="{{edata.user_id}}" required>
                         </div>
                         <div class="col-lg-2">
                             <label>Customer Name</label>
@@ -95,7 +99,7 @@
                         </div>
                          <div class="col-lg-2">
                             <label>Employee Name</label>
-                            <input name="EmployeeName" form="list" value="{{edata.Name}}" required>
+                            <input name="EmployeeName" form="list" value="{{edata.user_username}}" required>
 
                          </div>
 
