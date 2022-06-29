@@ -34,5 +34,30 @@ class Branch_Service:
         data = data.sort_values("count",ascending=False)
         data = data.head(5)
         return data.to_dict()["count"]
+    
+    def future_branch(self,branch):
+        df = pd.read_csv("C://Users//shant//PycharmProjects//pythonProject//miniproject2//customer_data.csv")
+        df['date'] = pd.to_datetime(df.date,  infer_datetime_format=True, errors ='coerce')
+        df = df[["date",'branch',"Total_price"]]
+        DSH_d=df.loc[df['branch']==branch]
+        data= DSH_d.groupby(pd.Grouper(key="date", freq="1W")).mean()
+        #plot 1
+        plot = data.plot(c='red')
+        fig = plot.get_figure()
+        fig.savefig(f"static//assets//branch_normal_{branch}.png")
+        from statsmodels.tsa.stattools import adfuller
+        import matplotlib.pyplot as plt
+        data['s_d'] = data['Total_price'] - data['Total_price']
+        data["s_d"] = data['s_d'].dropna()
+        import statsmodels.api as sm
+        from statsmodels.tsa.arima.model import ARIMA
+        from statsmodels.tsa.arima.model import ARIMA
+        model3=ARIMA(data['Total_price'],order=(1,0,1))
+        model_fit=model3.fit()
+        data['forecast'] =  model_fit.predict(start=18,end=31,dynamics=True)
+        # plot2
+        plot = data[['Total_price','forecast']].plot(figsize=(12,8))
+        fig = plot.get_figure()
+        fig.savefig(f"static//assets//branch_future_{branch}.png")
               
     

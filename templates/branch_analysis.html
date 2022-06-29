@@ -1,0 +1,26 @@
+{% extends "branch_base.html" %}
+{% block content %}<main>
+    <div class="text-center">
+        <div class="container" style="margin-top:60px;margin-left:220px;" >
+           <h1>Future Analysis 🔮 </h1>
+          
+          
+           <table class="table" style="text-align: center;">
+            <tr>
+                <td><img width=600 height=600 src="static//assets//branch_future_{{branch_manager.branch_name}}.png"/></td>
+                <td><img width=600 height=600 src="static//assets//branch_normal_{{branch_manager.branch_name}}.png" /></td>
+                
+                
+            </tr>
+            <tr>
+                <td><span><strong>Future analysis wit respect to the monthly data</strong></span></td>
+                <td><span><strong>The current analysis with respect to monthly data</strong></span></td>
+                
+            </tr>
+           
+            
+        </div>
+    </div>
+
+</main>
+{% endblock %}

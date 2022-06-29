@@ -7,9 +7,10 @@ import pandas as pd
 import datetime
 import json
 
+from pandas.tseries.offsets import DateOffset
 class Admin_Dashboard:
     def __init__(self):
-        self.df = pd.read_csv("C://Users//shant//PycharmProjects//pythonProject//miniproject2//bill_stick.csv")
+        self.df = pd.read_csv("C://Users//shant//PycharmProjects//pythonProject//miniproject2//customer_data.csv")
     def generate_revenue(self):
         # Getting the total  revenue of data
         total_revenue = self.df.Total_price.sum()
@@ -32,6 +33,30 @@ class Admin_Dashboard:
         self.df['date'] = pd.to_datetime(self.df.date,  infer_datetime_format=True, errors ='coerce')
         data = self.df.groupby(pd.Grouper(key="date", freq="1M")).sum()
         return data.to_dict()['Total_price']
+    def predict_future(self,start,end):
+        df = pd.read_csv("C://Users//shant//PycharmProjects//pythonProject//miniproject2//customer_data.csv")
+        df = df[["date","Total_price"]]
+        df['date'] = pd.to_datetime(df.date,  infer_datetime_format=True, errors ='coerce')
+        data = df.groupby(pd.Grouper(key="date", freq="1W")).mean()
+        from statsmodels.tsa.stattools import adfuller
+        data['s_d'] = data['Total_price'] - data['Total_price'].shift(5)
+        from statsmodels.graphics.tsaplots import plot_acf,plot_pacf
+        import statsmodels.api as sm
+        model  = sm.tsa.statespace.SARIMAX(data['Total_price'],order=(1,1,2),seasonal_order=(1,1,2,5))
+        results = model.fit()
+        data['forecast'] =  results.predict(start=start,end=end,dynamics=True)
+        plot = data[['Total_price','forecast']].plot(figsize=(12,8))
+        fig = plot.get_figure()
+        fig.savefig("static//assets//output_normal.png")
+        from pandas.tseries.offsets import DateOffset
+        future_date  = [data.index[-1]+DateOffset(weeks=x) for x in range(1,12)]
+        future_dataset_df = pd.DataFrame(index=future_date[1:],columns=data.columns)
+        future_df = pd.concat([data,future_dataset_df])
+        future_df['forecast'] =  results.predict(start=18,end=33,dynamics=True)
+        plot2 = future_df[['Total_price','forecast']].plot(figsize=(12,12))
+        fig = plot2.get_figure()
+        fig.savefig("static//assets//output_future.png")
+        return future_df
    
             
 

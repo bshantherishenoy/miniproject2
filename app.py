@@ -1,6 +1,7 @@
 # ------------------------IMPORTS ------------------------#
 import flask
 from flask import Flask, render_template, request, redirect, send_from_directory,flash,session
+from regex import F
 from werkzeug.security import generate_password_hash, check_password_hash
 import json
 import datetime
@@ -27,12 +28,12 @@ import traceback
 import sys
 from modules.service_admin import Admin_Dashboard
 from modules.service_branch import Branch_Service
-from flask_session import Session
+
 import numpy as np
 
 
 # ---------------------Initializing Dataframe ------------#
-output = pd.DataFrame()
+output = pd.read_csv("customer_data.csv")
 
 app = Flask(__name__)
 
@@ -44,7 +45,6 @@ app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI', "sq
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
-Session(app)
 
 index = None
 indexs = None
@@ -183,6 +183,14 @@ def home():
         return render_template("register.html")
 # --------------------------- Main Routes to Branch ----------------------#
 
+@app.route("/analysis_branch",methods=["GET","POST"])
+def analysis_branch():
+    id = session.get('username')
+    branch_manager = Branch.query.filter_by(branch_id=id).first()
+    branch = Branch_Service(branch_manager)
+    branch.future_branch(branch_manager.branch_name)
+    return render_template("branch_analysis.html",branch_manager=branch_manager)
+
 @app.route('/branch',methods=['GET','POST'])
 def main_branch():  
     id = session.get('username')
@@ -234,13 +242,15 @@ def main_branch():
 
 
 
-
-
-
-
-
-
 # ------------------------------Main Routes to Admin---------------------
+@app.route('/count_analysis',methods=['GET','POST'])
+def count_analysis():
+    return render_template("count_analysis.html")
+@app.route('/analysis_admin',methods=["GET","POST"])
+def analysis_admin():
+    data = Admin_Dashboard()
+    future = data.predict_future(18,23)
+    return render_template("analysis_admin.html")
 @app.route('/Admin_Pannel',methods=['GET'])
 def main_render():
     data = Admin_Dashboard()
@@ -375,101 +385,7 @@ margin = 100
 pdf_file_name = None
 
 
-def create_invoice(last_row):
-    # Reading values from excel file
-    customer=last_row[1]
-    invoice_number = last_row[6]
-    invoice_date = last_row[3]
-    customer_phno = last_row[2]
-    employee_id = last_row[4]
-    employee_name = last_row[5]
-    products = "".join(last_row[8])
-    total_amount = last_row[9]
-    quantity = "".join(last_row[7])
 
-    # Creating a pdf file and setting a naming convention
-    c = canvas.Canvas(f"static/files/{str(invoice_number)}.pdf")
-    c.setPageSize((page_width, page_height))
-
-    # Drawing the image
-    c.drawInlineImage("logo.jpg", page_width - image_width - margin,
-                      page_height - image_height - margin,
-                      image_width, image_height)
-
-    # Invoice information
-    c.setFont('Arial', 80)
-    text = 'INVOICE'
-    text_width = stringWidth(text, 'Arial', 80)
-    c.drawString((page_width - text_width) / 2, page_height - image_height - margin, text)
-    y = page_height - image_height - margin * 4
-    x = 2 * margin
-    x2 = x + 550
-
-    c.setFont('Arial', 45)
-    c.drawString(x, y, 'Issued by: ')
-    c.drawString(x2, y, company_name)
-    y -= margin
-
-    c.drawString(x, y, 'Issued to: ')
-    c.drawString(x2, y, customer)
-    y -= margin
-
-    c.drawString(x, y, 'Invoice number: ')
-    c.drawString(x2, y, str(invoice_number))
-    y -= margin
-
-    c.drawString(x, y, 'Invoice date: ')
-    c.drawString(x2, y, invoice_date)
-    y -= margin
-
-    c.drawString(x, y, 'Customer Phone No: ')
-    c.drawString(x2, y, customer_phno)
-    y -= margin * 2
-
-    c.drawString(x, y, 'Invoice issued for performed ' + employee_name + ' for ' + invoice_date)
-    y -= margin * 2
-
-    c.drawString(x, y, 'Amount including GST: ')
-    c.drawString(x2, y, 'INR ' + str(total_amount))
-    y -= margin
-
-    c.drawString(x, y, 'Products: ')
-    y -= margin
-    res = ast.literal_eval(products)
-    print(f"ITSRES{res}")
-    for i in range(len(res)):
-        print(i)
-        c.drawString(x, y, res[i])
-        y -= margin
-
-    for i in range(len(res)):
-        y += margin
-
-    y += margin
-    c.drawString(x2, y, 'Quantity: ')
-    y -= margin * 1
-    res = ast.literal_eval(quantity)
-    print(f"ITSRES{res}")
-    for i in range(len(res)):
-        print(i)
-        c.drawString(x2, y, res[i])
-        y -= margin
-
-    c.drawString(x, y, 'Total amount: ')
-    c.drawString(x2, y, 'INR ' + str(total_amount))
-    y -= margin * 3
-
-    c.drawString(x, y, 'Return will only be excepted only after the purchase of item within 2 days')
-    y -= margin
-    c.drawString(x, y, 'Any issues please contact Ashwini & Shantheri')
-    y -= margin
-    c.drawString(x, y, 'In case of any questions, contact info@thebestcompany.com')
-
-    # Saving the pdf file
-    c.save()
-    global pdf_file_name
-    pdf_file_name = f"{str(invoice_number)}.pdf"
-    return print("INVOICE CREATED")
 
 
 @app.route('/customers')
@@ -490,13 +406,13 @@ def check_product(Name):
     with open('json/default_products.json') as f1:
         pro_cons = json.load(f1)
         pro_con = pro_cons["products"]
-    print("CAME INSIDE FUNTCTION")
+   
     found = False
     pos = None
     Name = int(Name)
     for i in range(len(pro_con)):
         if Name == pro_con[i]['Product_Id']:
-            print("The product is found!!")
+            
             found = True
             pos = i
             break
@@ -553,6 +469,7 @@ def Billing():
             if state == 0:
                 product_in = product_details(Name[m])               
                 new_row = {
+                        
                         "name": datas["CustomerName"],
                         "phno": datas["CustomerPhoneno"],
                         "date": datas["Date"],
@@ -566,12 +483,14 @@ def Billing():
                         "product_company":product_in["Company"],
                         "Quantity_ordered": Quantity[m],
                         "Price of commodity":product_in["Price"],
-                        "Total_Price": datas['TotalPrice'],
+                        "Total_price": datas['TotalPrice'],
                         "net_price": product_in["net_price"]
                     }
-                output = output.append(new_row, ignore_index=True)
-        output.to_csv('customer_data.csv', mode='a', header=False, index=False)       
-        return render_template("Billing.html", edata=employee_details, products=pro_con, states=state)
+                output = output.append(new_row,ignore_index=True)
+                print(output.tail())
+                write_json(pro_cons)
+        output.to_csv('customer_data.csv', header=True,index=False)       
+        return redirect('/Billing')
     else:
         return render_template("Billing.html", edata=employee_details, products=pro_con, states=state)
 
