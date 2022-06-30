@@ -9,6 +9,10 @@ body, html {
 .flexview {
     display: flex;
 }
+html, body {
+    max-width: 100%;
+    overflow-x: hidden;
+}
 
 .flexview p {
     flex: 1;

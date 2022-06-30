@@ -28,8 +28,10 @@ import traceback
 import sys
 from modules.service_admin import Admin_Dashboard
 from modules.service_branch import Branch_Service
-
+import urllib.request
 import numpy as np
+
+import pdfkit
 
 
 # ---------------------Initializing Dataframe ------------#
@@ -133,6 +135,9 @@ def search_for_employee(list, n):
             return True
     return False
 
+
+    
+    
 
 # ------------------------ROUTES INDEX---------------------------#
 flag = False
@@ -241,11 +246,21 @@ def main_branch():
 
 
 
-
 # ------------------------------Main Routes to Admin---------------------
 @app.route('/count_analysis',methods=['GET','POST'])
 def count_analysis():
-    return render_template("count_analysis.html")
+    data = Admin_Dashboard()
+    counts = data.counter_value()["product_id"]
+    return render_template("count_analysis.html",counts=counts)
+
+@app.route('/admin_branch_analysis',methods=['GET','POST'])
+def admin_branch_analysis():
+    all_branch = Branch.query.order_by(Branch.branch_name).all()
+    for i in all_branch:
+        branch = Branch_Service(i)
+        branch.future_branch(i.branch_name)
+    return render_template("admin_branch_analysis.html",branch_manager = all_branch)
+
 @app.route('/analysis_admin',methods=["GET","POST"])
 def analysis_admin():
     data = Admin_Dashboard()
@@ -497,17 +512,11 @@ def Billing():
 
 @app.route('/download')
 def download():
-    global pdf_file_name
-    print(pdf_file_name)
-    if pdf_file_name is None:
-        list_of_files = glob.glob('static/files/*.pdf')  # * means all if need specific format then *.csv
-        latest_file = max(list_of_files, key=os.path.getctime)
-        print(latest_file)
-        prefix = "static/files\\"
-        file_pdf = remove_prefix(latest_file,prefix)
-        print(file_pdf)
-        return send_from_directory(directory="static", path=f'files/{file_pdf}')
-    return send_from_directory(directory="static", path=f'files/{pdf_file_name}')
+    global uuids
+    convert_pdf(uuid)
+    return send_from_directory(directory="static", path=f'files/{uuid}.pdf')
+  
+
 
 
 # --------------------------Routs to Admin--------------------#
@@ -557,7 +566,7 @@ def employee():
                 return render_template('employee.html', data=emp_list, warning=1,branch_manager =branch_manager)            
 
     else:
-        emp_list = Users.query.order_by(Users.user_username).all()
+        emp_list = Users.query.filter_by(user_branch=branch_manager.branch_name).all()
         return render_template('employee.html', data=emp_list,branch_manager =branch_manager)
 
 

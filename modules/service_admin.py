@@ -11,6 +11,7 @@ from pandas.tseries.offsets import DateOffset
 class Admin_Dashboard:
     def __init__(self):
         self.df = pd.read_csv("C://Users//shant//PycharmProjects//pythonProject//miniproject2//customer_data.csv")
+        self.faster = []
     def generate_revenue(self):
         # Getting the total  revenue of data
         total_revenue = self.df.Total_price.sum()
@@ -58,7 +59,23 @@ class Admin_Dashboard:
         fig.savefig("static//assets//output_future.png")
         return future_df
    
-            
+    def getPredict(self,df,num):
+        output = pd.DataFrame()
+        data= df.groupby(['product_id']).mean()
+        data.reset_index('product_id',inplace=True)
+        data1=data[data['product_id']==num]
+        self.faster.append([data])
+        
+    def counter_value(self):
+        df = pd.read_csv("C://Users//shant//PycharmProjects//pythonProject//miniproject2//customer_data.csv")
+        df['date'] = pd.to_datetime(df.date,  infer_datetime_format=True, errors ='coerce')
+        df = df[["date",'branch',"product_id","Quantity_ordered"]]
+        with open("C://Users//shant//PycharmProjects//pythonProject//miniproject2//json//refactored_products.json") as file:
+            data  = json.load(file)
+            data = len(data["products"])
+        for i in range(1,data+1):
+            self.getPredict(df,i)
+        return self.faster[-1][0].to_dict()
 
 
 

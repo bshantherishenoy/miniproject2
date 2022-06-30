@@ -1,0 +1,19 @@
+{% extends "baseadmin.html" %}
+{% block content %}
+<main>
+    <div class="text-center">
+        <div class="container" style="margin-top:60px;margin-left:220px;" >
+           <h1>Branch Analysis 🔮 </h1>
+          
+           <table class="table" style="text-align: center;overflow-x: hidden">
+            {% for i in branch_manager%}
+            <tr>
+                <td><img width=600 height=600 src="static//assets//branch_normal_{{i.branch_name}}.png" /><br><span><strong>Current Sales {{i.branch_name}}</strong></span></td>
+                <td><img width=600 height=600 src="static//assets//branch_future_{{i.branch_name}}.png"/><br><span><strong>Future Prediction {{i.branch_name}}</strong></span></td>
+            </tr>
+            {% endfor%}
+           </table>  
+        </div>
+    </div>
+</main>
+{% endblock %}

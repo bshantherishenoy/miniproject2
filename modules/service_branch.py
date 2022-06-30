@@ -1,4 +1,5 @@
 import pandas as pd
+import json
 class Branch_Service:
     def __init__(self,branch_manager):
         self.branch_name = branch_manager.branch_name
@@ -8,6 +9,7 @@ class Branch_Service:
         self.df['date'] = pd.to_datetime(self.df.date,  infer_datetime_format=True, errors ='coerce')
         self.df["count"] = 1
         self.df = self.df[self.df["branch"] ==self.branch_name]
+        
     def generate_revenue(self):
         net_price = self.df["net_price"].sum()
         total_price = self.df["Total_price"].sum()
@@ -59,5 +61,6 @@ class Branch_Service:
         plot = data[['Total_price','forecast']].plot(figsize=(12,8))
         fig = plot.get_figure()
         fig.savefig(f"static//assets//branch_future_{branch}.png")
-              
     
+    
+              
